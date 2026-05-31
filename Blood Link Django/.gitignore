@@ -8,8 +8,7 @@ env/
 venv/
 .env
 
-# Database
-db.sqlite3
+
 
 # IDEs
 .vscode/

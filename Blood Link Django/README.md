@@ -1,41 +1,67 @@
 # BloodLink Backend & Web Portal (Django) 💻
 
-The core engine of the BloodLink platform, providing a robust API for mobile clients and a professional web portal for desktop users.
-
-## ✨ Key Features
-- **RESTful API:** Complete set of endpoints for authentication, request management, and user profiles.
-- **Web Dashboard:** Dedicated pages for detailed blood request views.
-- **Admin Command Center:** Powerful management interface for administrators.
-- **Timezone Aware:** Server-side calculations for Pakistani Time (PKT).
-- **Security:** CORS configured for Flutter Web compatibility.
-
-## 🚀 Setup & Installation
-
-### 1. Requirements
-*   Python 3.10+
-*   Django 5.0+
-*   Django REST Framework
-*   django-cors-headers
-
-### 2. Run the Server
-1. Navigate to the project root:
-   ```bash
-   cd myproject
-   ```
-2. Run migrations:
-   ```bash
-   python manage.py migrate
-   ```
-3. Start the development server:
-   ```bash
-   python manage.py runserver 0.0.0.0:8000
-   ```
-
-## 🔌 API Documentation
-The API is designed to be consumed by the BloodLink Flutter app. Key endpoints include:
-*   `/api/login/` - User Authentication
-*   `/api/requests/my/` - Fetch user-specific requests
-*   `/api/requests/update/` - Change request status
+This is the core server engine of the BloodLink platform. It provides the REST API endpoints consumed by the Flutter mobile application and includes an Administrative Dashboard UI for blood donation system management.
 
 ---
-*Developed with Django & Python*
+
+## ✨ Features & Capabilities
+
+- **RESTful Endpoints:** Complete API for signups, profile updates, city lists, blood group lists, and requests.
+- **Django Signals (Flutter Code Generator):** Listens to database events (`City` & `BloodGroup`) and automatically generates `Constants.dart` in the Flutter directory on edit/add/delete actions.
+- **Role Isolation:** Filters out superusers and administrative roles from normal user registries (donors and recipients).
+- **Custom Admin Interface:** Beautiful custom-styled pages to manage cities, blood groups, and view activity logs.
+- **Security Protocols:** Properly configured CORS (Cross-Origin Resource Sharing) middleware to prevent blocked cross-origin mobile and web requests.
+
+---
+
+## 🛠️ API Reference Endpoints
+
+| Endpoint | Method | Description |
+| :--- | :--- | :--- |
+| `/api/login/` | `POST` | User authentication returning simple JWT tokens. |
+| `/api/register/` | `POST` | Standard user registration form. |
+| `/api/cities/` | `GET` | Retrieve list of active Pakistani cities. |
+| `/api/blood-groups/` | `GET` | Retrieve list of registered blood groups. |
+| `/api/requests/send/` | `POST` | Create a new urgent blood request. |
+| `/api/requests/my/` | `GET` | View user's sent or received blood requests. |
+
+---
+
+## 🚀 Setup & Execution
+
+### 1. Requirements
+Ensure you have the following installed in your system:
+- Python 3.10+
+- Django 5.x+
+- Pillow (for image uploads)
+- django-cors-headers
+
+### 2. Quickstart Commands
+Navigate to the `myproject` root:
+```bash
+cd myproject
+```
+
+Install packages:
+```bash
+pip install -r ../requirements.txt
+```
+
+Run migrations (Seeds default Pakistani cities & standard blood groups):
+```bash
+python manage.py migrate
+```
+
+Create a Superuser (Admin account):
+```bash
+python manage.py createsuperuser
+```
+
+Run server:
+```bash
+python manage.py runserver 0.0.0.0:8000
+```
+- Access Admin Panel Dashboard at: `http://localhost:8000/admin-panel/`
+
+---
+*Part of the BloodLink Unified Platform*

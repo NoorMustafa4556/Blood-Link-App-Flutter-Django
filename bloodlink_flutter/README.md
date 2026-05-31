@@ -1,40 +1,54 @@
 # BloodLink Mobile App (Flutter) 📱
 
-A professional, cross-platform mobile application designed for efficient blood donation management.
+A professional, cross-platform mobile application designed for efficient blood donation tracking, donor discovery, and real-time request notifications.
 
-## ✨ Key Features
-- **Real-time Request Tracking:** Never miss a life-saving opportunity.
-- **Accurate Countdown:** Intelligent timer synced with the server to show exact expiration.
-- **Secure Authentication:** JWT-based login and registration.
-- **Profile Management:** Update availability, location, and contact info easily.
-- **Push-like Experience:** Polling mechanism ensures you see new requests within seconds.
+---
 
-## 🛠️ Setup Instructions
+## ✨ Features
+
+- **Dynamic Dropdowns (API Integration):** Fetches cities and blood groups from the Django REST backend, falling back to local configurations offline.
+- **Provider-Based Architecture:** Uses ChangeNotifier Provider to manage authentication states, user role states, and request streams.
+- **Flexible Offline Defaults:** Works offline during presentations using static structures from `Constants.dart`.
+- **Countdown Duration Timers:** Displays reactive countdown indicators for urgent blood requests based on duration parameters.
+- **Dual Dashboard Modes:** Switch between Donor mode (receive requests, edit availability) and Recipient mode (create request, search donors) dynamically.
+
+---
+
+## 🛠️ Configuration & Setup
 
 ### 1. Prerequisites
-*   Flutter SDK (Latest stable version)
-*   Android Studio / VS Code
-*   A running instance of the BloodLink Django Backend.
+- Flutter SDK (stable version)
+- Android Studio / VS Code with Dart plugins
+- A physical device or emulator connected to the local server network.
 
-### 2. Configuration
-Open `lib/utils/Config.dart` and update the `baseUrl` with your computer's local IP address:
+### 2. Configure Local Host Server IP
+Before running, configure `lib/utils/Config.dart` with your development computer's local IP address:
 ```dart
-static const String baseUrl = kIsWeb 
-    ? 'http://localhost:8000' 
-    : 'http://192.168.100.231:8000'; // Change this IP
+class AppConfig {
+  static const String baseUrl = 'http://192.168.100.x:8000'; // Replace with your IPv4 address
+}
 ```
 
-### 3. Run the App
+### 3. Run Commands
+Retrieve packages:
 ```bash
 flutter pub get
+```
+
+Run application:
+```bash
 flutter run
 ```
 
-## 🏗️ Architecture
-- **State Management:** Provider
-- **Networking:** Dio (with Interceptors for Auth)
-- **Local Storage:** Flutter Secure Storage
-- **UI Design:** Material 3 with Custom Styling
+---
+
+## 🏗️ Folder Structure
+
+- 📂 `lib/models/` - Declares Dart structures matching backend serialization.
+- 📂 `lib/providers/` - Manages app state (`AuthProvider` and `BloodProvider`).
+- 📂 `lib/screens/` - UI pages (Auth, Home dashboard, Donor searches, Profiles).
+- 📂 `lib/services/` - Base client (`ApiService`) for sending structured HTTP requests.
+- 📂 `lib/utils/` - Static configurations, theme configurations, and constants.
 
 ---
 *Part of the BloodLink Unified Platform*
