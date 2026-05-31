@@ -1,0 +1,149 @@
+{% extends 'main.html' %}
+
+{% block content %}
+<div class="header">
+    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <div>
+            <h1>Dashboard</h1>
+            <p style="color: #666; font-weight: 500;">
+                Role: <span style="color: var(--primary); font-weight: 700;">{{ current_role|title }}</span>
+                {% if user.profile.is_donor and current_role == 'donor' %}
+                    <span style="margin-left: 10px; font-size: 12px; background: #e8f5e9; color: #2e7d32; padding: 4px 10px; border-radius: 20px;">
+                        <i class="fa-solid fa-circle" style="font-size: 8px;"></i> Online
+                    </span>
+                {% endif %}
+            </p>
+        </div>
+        {% if user.profile.is_donor %}
+        <div style="background: #f0f0f0; padding: 5px; border-radius: 12px; display: flex; gap: 5px;">
+            <form action="{% url 'login' %}" method="POST" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="username" value="{{ user.username }}">
+                <!-- Logic for switching role: we simulate a login or just update session in a real view. 
+                     For simplicity here, we'll assume the user can re-login to switch or we add a specific switch view later.
+                     But based on workflow, they choose at login. -->
+            </form>
+            <p style="font-size: 12px; padding: 5px 15px; color: #888;">Switch Mode via Logout/Login</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if not is_donor %}
+<!-- Recipient View -->
+<div class="grid">
+    {% for group in blood_groups %}
+    <a href="{% url 'search_donors' %}?blood_group={{ group }}" class="card" style="text-decoration: none; text-align: center;">
+        <i class="fa-solid fa-droplet" style="font-size: 40px; color: var(--primary); margin-bottom: 15px;"></i>
+        <h2 style="font-size: 24px; color: #333;">{{ group }}</h2>
+        <p style="color: #888; font-size: 14px; margin-top: 5px;">Search Donors</p>
+    </a>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if recent_responses %}
+<div style="margin-top: 40px; margin-bottom: 20px;">
+    <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #2E7D32;">
+        <i class="fa-solid fa-bell"></i> 
+        Recent Responses (Accepted / Rejected)
+    </h3>
+    
+    <div style="display: grid; gap: 20px;">
+        {% for req in recent_responses %}
+        <a href="{% url 'request_detail' req.id %}" class="card" style="display: flex; justify-content: space-between; align-items: center; text-decoration: none; color: inherit; border-left: 5px solid {% if req.status == 'Accepted' %}#2E7D32{% else %}#C62828{% endif %};">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div style="width: 50px; height: 50px; border-radius: 15px; background: {% if req.status == 'Accepted' %}#E8F5E9; color: #2E7D32{% else %}#FFEBEE; color: #C62828{% endif %}; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 20px;">
+                    {{ req.blood_group }}
+                </div>
+                <div>
+                    <h4 style="font-size: 18px; margin-bottom: 2px;">{{ req.patient_name }}</h4>
+                    <p style="font-size: 13px; color: #888;">{{ req.hospital_name }}, {{ req.city }}</p>
+                </div>
+            </div>
+            
+            <div style="text-align: right;">
+                <span class="badge" style="background: {% if req.status == 'Accepted' %}#E8F5E9; color: #2E7D32{% else %}#FFEBEE; color: #C62828{% endif %}; padding: 8px 16px; border-radius: 20px; font-weight: 700; font-size: 14px;">
+                    {{ req.status|upper }}
+                </span>
+                {% if req.status == 'Accepted' %}
+                <br><span style="font-size: 11px; color: #2E7D32; font-weight: bold; margin-top: 5px; display: inline-block;">(Click to view contact number)</span>
+                {% endif %}
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div style="margin-top: 40px;">
+    <h3 style="margin-bottom: 25px; display: flex; align-items: center; gap: 10px;">
+        <i class="fa-solid fa-clock-rotate-left" style="color: var(--primary);"></i> 
+        {% if is_donor %}Received Requests{% else %}Your Active Requests{% endif %}
+    </h3>
+    
+    <div style="display: grid; gap: 20px;">
+        {% for req in active_requests %}
+        <a href="{% url 'request_detail' req.id %}" class="card" style="display: flex; justify-content: space-between; align-items: center; text-decoration: none; color: inherit;">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div style="width: 50px; height: 50px; border-radius: 15px; background: #FFEBEE; color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 20px;">
+                    {{ req.blood_group }}
+                </div>
+                <div>
+                    <h4 style="font-size: 18px; margin-bottom: 2px;">{{ req.patient_name }}</h4>
+                    <p style="font-size: 13px; color: #888;">{{ req.hospital_name }}, {{ req.city }}</p>
+                </div>
+            </div>
+            
+            <div style="text-align: right;">
+                <div style="background: #FFF3E0; color: #E65100; padding: 8px 15px; border-radius: 12px; font-weight: 700; font-size: 14px; margin-bottom: 10px; display: inline-flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-stopwatch"></i>
+                    <span class="countdown" data-created="{{ req.created_at|date:'c' }}" data-duration="{{ req.duration }}">Calculating...</span>
+                </div>
+                <br>
+                {% if is_donor %}
+                <a href="{% url 'update_request_status' req.id 'Accepted' %}" onclick="event.stopPropagation();" class="btn btn-accent" style="padding: 5px 15px; font-size: 12px; border-radius: 8px;">Accept</a>
+                <a href="{% url 'update_request_status' req.id 'Rejected' %}" onclick="event.stopPropagation();" class="btn" style="padding: 5px 15px; font-size: 12px; border: 1px solid #ddd; border-radius: 8px;">Reject</a>
+                {% else %}
+                <span style="font-size: 12px; font-weight: 700; color: #ffb703;">PENDING</span>
+                {% endif %}
+            </div>
+        </a>
+        {% empty %}
+        <div class="card" style="text-align: center; padding: 50px; color: #ccc;">
+            <i class="fa-solid fa-inbox" style="font-size: 50px; margin-bottom: 15px; opacity: 0.3;"></i>
+            <p>No active requests at the moment.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    function updateTimers() {
+        const timers = document.querySelectorAll('.countdown');
+        timers.forEach(timer => {
+            const created = new Date(timer.getAttribute('data-created'));
+            const duration = parseInt(timer.getAttribute('data-duration'));
+            const expires = new Date(created.getTime() + duration * 60 * 60 * 1000);
+            const now = new Date();
+            
+            const diff = expires - now;
+            
+            if (diff <= 0) {
+                timer.innerHTML = "EXPIRED";
+                timer.parentElement.style.background = "#FFEBEE";
+                timer.parentElement.style.color = "#C62828";
+            } else {
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const secs = Math.floor((diff % (1000 * 60)) / 1000);
+                timer.innerHTML = `${hours}h ${mins}m ${secs}s`;
+            }
+        });
+    }
+    
+    setInterval(updateTimers, 1000);
+    updateTimers();
+
+</script>
+{% endblock %}

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin | BloodBank</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --admin-bg: #4a4e69;
+            --primary: #ef233c;
+            --white: #ffffff;
+            --shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body { background: #f4f7f6; min-height: 100vh; }
+        
+        .admin-nav {
+            background: linear-gradient(90deg, #2b2d42 0%, #4a4e69 100%);
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .logo { font-size: 24px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+        
+        .admin-container { padding: 40px; max-width: 1400px; margin: 0 auto; }
+        
+        .btn { padding: 10px 20px; border-radius: 12px; border: none; cursor: pointer; font-weight: 600; transition: all 0.3s; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-white { background: white; color: #2b2d42; }
+        .btn-primary { background: var(--primary); color: white; }
+        
+        .card { background: white; border-radius: 24px; padding: 30px; box-shadow: var(--shadow); border: 1px solid #f0f0f0; }
+        
+        @block extra_css @endblock
+    </style>
+</head>
+<body>
+
+    <nav class="admin-nav">
+        <div class="logo">
+            <i class="fa-solid fa-shield-heart" style="color: #ef233c;"></i>
+            <span>BloodBank Admin</span>
+        </div>
+        <div style="display: flex; gap: 20px; align-items: center;">
+            <a href="{% url 'admin_manage_cities' %}" style="color: white; text-decoration: none; font-size: 14px; font-weight: 600;"><i class="fa-solid fa-city"></i> Manage Cities</a>
+            <a href="{% url 'admin_manage_blood_groups' %}" style="color: white; text-decoration: none; font-size: 14px; font-weight: 600;"><i class="fa-solid fa-droplet" style="color: #ef233c;"></i> Manage Blood Groups</a>
+            <a href="{% url 'admin_profile_edit' %}" style="color: white; text-decoration: none; font-size: 14px; font-weight: 600; opacity: 0.9; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'"><i class="fa-solid fa-user-tie"></i> Hello, {{ user.first_name|default:user.username }}</a>
+            <a href="{% url 'logout' %}" class="btn btn-white" style="padding: 8px 15px; font-size: 13px;">Logout</a>
+        </div>
+    </nav>
+
+    <div class="admin-container">
+        {% block content %}{% endblock %}
+    </div>
+
+</body>
+</html>

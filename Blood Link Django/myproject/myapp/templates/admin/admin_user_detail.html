@@ -1,0 +1,80 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 0 auto;">
+    
+    <!-- Compact Header Card -->
+    <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 30px; border: none; border-radius: 20px; box-shadow: var(--shadow);">
+        <div style="background: linear-gradient(135deg, #2b2d42 0%, #4a4e69 100%); padding: 30px; position: relative; display: flex; align-items: center; gap: 25px; color: white;">
+            <a href="{% url 'admin_all_users' %}" style="position: absolute; top: 15px; left: 20px; color: white; text-decoration: none; font-size: 14px; font-weight: 600; opacity: 0.8; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'"><i class="fa-solid fa-arrow-left"></i> Back to Users</a>
+            
+            <div style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.2); overflow: hidden; background: white; margin-top: 10px;">
+                {% if user_obj.profile.image %}
+                    <img src="{{ user_obj.profile.image.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                {% else %}
+                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #ef233c; color: white; font-size: 40px; font-weight: 800;">
+                        {{ user_obj.username.0|upper }}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div style="flex: 1; margin-top: 15px;">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 5px;">
+                    <h2 style="font-size: 26px; font-weight: 700; margin: 0;">{{ user_obj.first_name|default:user_obj.username }}</h2>
+                    <span style="background: {% if user_obj.profile.is_donor %}#38b000{% else %}#3a86ff{% endif %}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase;">
+                        {{ user_obj.profile.is_donor|yesno:"Donor,Recipient" }}
+                    </span>
+                    {% if user_obj.profile.is_donor %}
+                        <span style="background: #ef233c; color: white; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 700;">
+                            {{ user_obj.profile.blood_group }}
+                        </span>
+                    {% endif %}
+                </div>
+                <p style="color: rgba(255,255,255,0.7); font-size: 14px; margin-bottom: 2px;">@{{ user_obj.username }} | {{ user_obj.email }}</p>
+                <p style="color: rgba(255,255,255,0.7); font-size: 14px;"><i class="fa-solid fa-location-dot"></i> {{ user_obj.profile.city|default:"Not set" }} | <i class="fa-solid fa-phone"></i> {{ user_obj.profile.phone_number|default:"Not set" }}</p>
+            </div>
+        </div>
+        
+        <!-- Stats Row -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 25px; background: #f8f9fa;">
+            <div style="background: white; border-radius: 15px; padding: 20px; text-align: center; border: 1px solid #eee; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+                <h4 style="color: #888; text-transform: uppercase; letter-spacing: 0.5px; font-size: 11px; margin-bottom: 5px;">Requests Sent</h4>
+                <h3 style="font-size: 36px; color: #3a86ff; font-weight: 700; margin: 0;">{{ all_sent|length }}</h3>
+            </div>
+            <div style="background: white; border-radius: 15px; padding: 20px; text-align: center; border: 1px solid #eee; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+                <h4 style="color: #888; text-transform: uppercase; letter-spacing: 0.5px; font-size: 11px; margin-bottom: 5px;">Requests Received</h4>
+                <h3 style="font-size: 36px; color: #38b000; font-weight: 700; margin: 0;">{{ all_received|length }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Activity Log -->
+    <div class="card" style="border-radius: 20px; box-shadow: var(--shadow);">
+        <h3 style="margin-bottom: 20px; font-size: 18px; font-weight: 700; color: #2b2d42;"><i class="fa-solid fa-clock-rotate-left" style="color: #ef233c; margin-right: 8px;"></i> Recent Activity Log</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
+            <div>
+                <h4 style="margin-bottom: 12px; color: #3a86ff; font-size: 14px; font-weight: 600;">Recent Sent Requests</h4>
+                {% for r in all_sent|slice:":5" %}
+                    <div style="padding: 12px 15px; border-radius: 10px; background: #f1f7ff; margin-bottom: 8px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid #3a86ff;">
+                        <span>To: <strong>{{ r.receiver.first_name|default:r.receiver.username }}</strong></span>
+                        <span style="font-weight: 700; color: {% if r.status == 'Accepted' %}#38b000{% elif r.status == 'Pending' %}#ffb703{% else %}#ef233c{% endif %};">{{ r.status }}</span>
+                    </div>
+                {% empty %}
+                    <p style="color: #aaa; font-size: 13px;">No requests sent.</p>
+                {% endfor %}
+            </div>
+            <div>
+                <h4 style="margin-bottom: 12px; color: #38b000; font-size: 14px; font-weight: 600;">Recent Received Requests</h4>
+                {% for r in all_received|slice:":5" %}
+                    <div style="padding: 12px 15px; border-radius: 10px; background: #f2fff1; margin-bottom: 8px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid #38b000;">
+                        <span>From: <strong>{{ r.sender.first_name|default:r.sender.username }}</strong></span>
+                        <span style="font-weight: 700; color: {% if r.status == 'Accepted' %}#38b000{% elif r.status == 'Pending' %}#ffb703{% else %}#ef233c{% endif %};">{{ r.status }}</span>
+                    </div>
+                {% empty %}
+                    <p style="color: #aaa; font-size: 13px;">No requests received.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

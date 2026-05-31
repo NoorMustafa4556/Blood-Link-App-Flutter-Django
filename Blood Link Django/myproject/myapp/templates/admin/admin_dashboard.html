@@ -1,0 +1,105 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block content %}
+<div style="text-align: center; margin-bottom: 50px;">
+    <h1 style="font-size: 42px; font-weight: 800; color: #2b2d42; margin-bottom: 10px;">Admin Dashboard</h1>
+    <p style="color: #888;">Overview of BloodLink system activity.</p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px; margin-bottom: 50px;">
+    <!-- Total Users Card -->
+    <a href="{% url 'admin_all_users' %}" class="card" style="background: #3a86ff; color: white; text-align: center; text-decoration: none; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+        <i class="fa-solid fa-users" style="font-size: 50px; margin-bottom: 15px; opacity: 0.8;"></i>
+        <h2 style="font-size: 36px; margin-bottom: 5px;">{{ total_users }}</h2>
+        <p style="font-weight: 600; opacity: 0.9;">Total Users</p>
+    </a>
+
+    <!-- Donors Card -->
+    <a href="{% url 'admin_all_users' %}?role=donor" class="card" style="background: #38b000; color: white; text-align: center; text-decoration: none; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+        <i class="fa-solid fa-heart-pulse" style="font-size: 50px; margin-bottom: 15px; opacity: 0.8;"></i>
+        <h2 style="font-size: 36px; margin-bottom: 5px;">{{ total_donors }}</h2>
+        <p style="font-weight: 600; opacity: 0.9;">Active Donors</p>
+    </a>
+
+    <!-- Recipients Card -->
+    <a href="{% url 'admin_all_users' %}?role=recipient" class="card" style="background: #00b4d8; color: white; text-align: center; text-decoration: none; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+        <i class="fa-solid fa-person-walking-with-cane" style="font-size: 50px; margin-bottom: 15px; opacity: 0.8;"></i>
+        <h2 style="font-size: 36px; margin-bottom: 5px;">{{ total_recipients }}</h2>
+        <p style="font-weight: 600; opacity: 0.9;">Recipients</p>
+    </a>
+
+    <!-- Active Requests Card -->
+    <a href="{% url 'admin_all_requests' %}" class="card" style="background: #ffb703; color: white; text-align: center; text-decoration: none; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+        <i class="fa-solid fa-layer-group" style="font-size: 50px; margin-bottom: 15px; opacity: 0.8;"></i>
+        <h2 style="font-size: 36px; margin-bottom: 5px;">{{ pending_requests }}</h2>
+        <p style="font-weight: 600; opacity: 0.9;">Active Requests</p>
+    </a>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px;">
+    <!-- Recent Requests -->
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+            <h3 style="font-size: 20px;"><i class="fa-solid fa-list-check" style="color: var(--primary);"></i> Recent Blood Requests</h3>
+            <a href="{% url 'admin_all_requests' %}" style="color: var(--primary); font-weight: 700; text-decoration: none;">View All</a>
+        </div>
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="text-align: left; border-bottom: 1px solid #f0f0f0;">
+                    <th style="padding: 15px 0; color: #888;">Patient</th>
+                    <th style="padding: 15px 0; color: #888;">Group</th>
+                    <th style="padding: 15px 0; color: #888;">Status</th>
+                    <th style="padding: 15px 0; color: #888;">Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in all_requests %}
+                <tr style="border-bottom: 1px solid #f9f9f9;">
+                    <td style="padding: 15px 0;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 30px; height: 30px; border-radius: 50%; overflow: hidden; border: 1px solid #eee;">
+                                {% if req.sender.profile.image %}
+                                    <img src="{{ req.sender.profile.image.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                {% else %}
+                                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #f1f1f1; color: #888; font-size: 10px; font-weight: 800;">
+                                        {{ req.sender.first_name.0|upper }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <span style="font-weight: 600;">{{ req.patient_name }}</span>
+                        </div>
+                    </td>
+                    <td style="padding: 15px 0;"><span style="background: #FFEBEE; color: var(--primary); padding: 4px 10px; border-radius: 8px; font-weight: 700;">{{ req.blood_group }}</span></td>
+                    <td style="padding: 15px 0;"><span style="font-weight: 600; color: {% if req.status == 'Accepted' %}#38b000{% elif req.status == 'Pending' %}#ffb703{% else %}#ef233c{% endif %};">{{ req.status }}</span></td>
+                    <td style="padding: 15px 0; color: #888;">{{ req.created_at|date:"d M, Y" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Newest Donors -->
+    <div class="card">
+        <h3 style="font-size: 20px; margin-bottom: 25px;"><i class="fa-solid fa-user-plus" style="color: #38b000;"></i> Newest Donors</h3>
+        {% for donor in all_donors %}
+        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #f9f9f9;">
+            <div style="width: 45px; height: 45px; border-radius: 12px; overflow: hidden; border: 1px solid #eee;">
+                {% if donor.image %}
+                    <img src="{{ donor.image.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                {% else %}
+                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #E8F5E9; color: #2E7D32; font-weight: 800;">
+                        {{ donor.user.first_name.0|upper }}
+                    </div>
+                {% endif %}
+            </div>
+            <div style="flex: 1;">
+                <p style="font-weight: 700; font-size: 14px;">{{ donor.user.first_name }}</p>
+                <p style="font-size: 12px; color: #888;">{{ donor.city }} | {{ donor.blood_group }}</p>
+            </div>
+            <a href="{% url 'admin_user_detail' donor.user.id %}" style="color: var(--primary);"><i class="fa-solid fa-chevron-right"></i></a>
+        </div>
+        {% endfor %}
+        <a href="{% url 'admin_all_users' %}" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 10px;">View All Users</a>
+    </div>
+</div>
+{% endblock %}

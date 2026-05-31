@@ -1,0 +1,86 @@
+{% extends 'main.html' %}
+
+{% block content %}
+<div class="header">
+    <h1>Search Donors</h1>
+</div>
+
+<div class="card" style="margin-bottom: 40px;">
+    <form action="{% url 'search_donors' %}" method="GET" style="display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 200px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #666;">Blood Group</label>
+            <select name="blood_group" class="btn" style="width: 100%; border: 1px solid #ddd; background: #f9f9f9; text-align: left;">
+                <option value="">All Groups</option>
+                {% for bg in blood_groups %}
+                <option value="{{ bg }}" {% if blood_group == bg %}selected{% endif %}>{{ bg }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div style="flex: 1; min-width: 200px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #666;">City</label>
+            <select name="city" class="btn" style="width: 100%; border: 1px solid #ddd; background: #f9f9f9; text-align: left;">
+                <option value="">All Cities</option>
+                {% for c in cities %}
+                <option value="{{ c.name }}" {% if city == c.name %}selected{% endif %}>{{ c.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary" style="height: 48px;"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+    </form>
+</div>
+
+<div class="grid">
+    {% for donor in donors %}
+    {% if donor.user.id in pending_donor_ids %}
+    <div class="card donor-card" style="text-align: center; padding: 30px; opacity: 0.65; position: relative;">
+        <div style="width: 100px; height: 100px; border-radius: 50%; background: #f1f1f1; margin: 0 auto 20px; overflow: hidden; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+            {% if donor.image %}
+                <img src="{{ donor.image.url }}" style="width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%);">
+            {% else %}
+                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #999; color: white; font-size: 32px; font-weight: 800;">
+                    {{ donor.user.first_name.0|upper }}
+                </div>
+            {% endif %}
+        </div>
+        <h3 style="font-size: 20px; margin-bottom: 5px; color: #777;">{{ donor.user.first_name }}</h3>
+        <p style="color: #999; font-size: 14px; margin-bottom: 15px;"><i class="fa-solid fa-location-dot"></i> {{ donor.city }}</p>
+        
+        <div style="margin-bottom: 20px;">
+            <span style="background: #eee; color: #666; padding: 6px 15px; border-radius: 20px; font-size: 14px; font-weight: 700;">
+                {{ donor.blood_group }}
+            </span>
+        </div>
+
+        <button class="btn" style="width: 100%; justify-content: center; background: #e0e0e0; color: #888; cursor: not-allowed; pointer-events: none;" disabled>REQUEST PENDING</button>
+    </div>
+    {% else %}
+    <div class="card donor-card" style="text-align: center; padding: 30px;">
+        <div style="width: 100px; height: 100px; border-radius: 50%; background: #f1f1f1; margin: 0 auto 20px; overflow: hidden; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+            {% if donor.image %}
+                <img src="{{ donor.image.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+            {% else %}
+                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: var(--primary); color: white; font-size: 32px; font-weight: 800;">
+                    {{ donor.user.first_name.0|upper }}
+                </div>
+            {% endif %}
+        </div>
+        <h3 style="font-size: 20px; margin-bottom: 5px;">{{ donor.user.first_name }}</h3>
+        <p style="color: #888; font-size: 14px; margin-bottom: 15px;"><i class="fa-solid fa-location-dot"></i> {{ donor.city }}</p>
+        
+        <div style="margin-bottom: 20px;">
+            <span style="background: #FFEBEE; color: var(--primary); padding: 6px 15px; border-radius: 20px; font-size: 14px; font-weight: 700;">
+                {{ donor.blood_group }}
+            </span>
+        </div>
+
+        <a href="{% url 'donor_profile' donor.user.id %}" class="btn btn-accent" style="width: 100%; justify-content: center;">VIEW PROFILE</a>
+    </div>
+    {% endif %}
+    {% empty %}
+    <div style="grid-column: 1 / -1; text-align: center; padding: 50px;">
+        <i class="fa-solid fa-user-slash" style="font-size: 60px; color: #ddd; margin-bottom: 20px;"></i>
+        <p style="color: #888; font-size: 18px;">No donors found matching your criteria.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

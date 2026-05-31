@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BloodLink | Save Lives</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body { 
+            background: linear-gradient(135deg, #C62828 0%, #b71c1c 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: white;
+            text-align: center;
+        }
+        .splash-container {
+            animation: fadeIn 1s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .logo-box {
+            font-size: 100px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
+        }
+        h1 { font-size: 48px; font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; }
+        p { font-size: 18px; opacity: 0.9; margin-bottom: 50px; }
+        
+        .btn-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+        .btn {
+            padding: 18px 45px;
+            border-radius: 20px;
+            font-size: 18px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+        .btn-white {
+            background: white;
+            color: #C62828;
+        }
+        .btn-white:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+        .btn-outline {
+            border: 2px solid white;
+            color: white;
+        }
+        .btn-outline:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-5px);
+        }
+        
+        /* Floating droplets animation */
+        .droplet {
+            position: absolute;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float 20s infinite linear;
+        }
+        @keyframes float {
+            0% { transform: translateY(100vh) scale(0); }
+            100% { transform: translateY(-100vh) scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Animated droplets -->
+    <script>
+        for (let i = 0; i < 20; i++) {
+            let droplet = document.createElement('div');
+            droplet.className = 'droplet';
+            droplet.style.left = Math.random() * 100 + 'vw';
+            droplet.style.width = droplet.style.height = Math.random() * 50 + 20 + 'px';
+            droplet.style.animationDelay = Math.random() * 20 + 's';
+            droplet.style.opacity = Math.random() * 0.3;
+            document.body.appendChild(droplet);
+        }
+    </script>
+
+    <div class="splash-container">
+        <div class="logo-box">
+            <i class="fa-solid fa-droplet"></i>
+        </div>
+        <h1>BloodLink</h1>
+        <p>Your search for a life-saver ends here.</p>
+
+        <div class="btn-group">
+            <a href="{% url 'login' %}" class="btn btn-white">SIGN IN</a>
+            <a href="{% url 'signup' %}" class="btn btn-outline">CREATE ACCOUNT</a>
+        </div>
+    </div>
+
+</body>
+</html>

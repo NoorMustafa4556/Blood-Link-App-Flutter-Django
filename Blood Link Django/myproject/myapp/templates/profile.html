@@ -1,0 +1,218 @@
+{% extends 'main.html' %}
+
+{% block extra_css %}
+<style>
+    .profile-card { max-width: 800px; margin: 0 auto; background: white; border-radius: 24px; overflow: hidden; box-shadow: var(--shadow); }
+    .profile-header { background: linear-gradient(135deg, #C62828 0%, #b71c1c 100%); padding: 25px 20px; text-align: center; color: white; }
+    .profile-img-container { width: 100%; height: 100%; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); overflow: hidden; background: white; }
+    .profile-img-container img { width: 100%; height: 100%; object-fit: cover; }
+    .profile-body { padding: 25px 35px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; margin-bottom: 6px; font-weight: 600; color: #666; font-size: 13px; }
+    .form-control { width: 100%; padding: 10px 15px; border-radius: 12px; border: 1px solid #eee; background: #f9f9f9; font-size: 15px; transition: all 0.3s; }
+    .form-control:focus { border-color: var(--primary); background: white; outline: none; }
+    .iti { width: 100% !important; }
+    .switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+    .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: var(--accent); }
+    input:checked + .slider:before { transform: translateX(26px); }
+    .availability-box { background: #f8f9fa; padding: 15px 20px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border: 1px solid #eee; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="header" style="margin-bottom: 15px;">
+    <h1 style="margin: 0; font-size: 28px;">Profile Settings</h1>
+</div>
+
+<div class="profile-card">
+    <div class="profile-header">
+        <div class="profile-img-wrapper" style="position: relative; width: 100px; height: 100px; margin: 0 auto 10px; cursor: pointer;" onclick="document.getElementById('profile-image-input').click()">
+            <div class="profile-img-container" style="width: 100%; height: 100%; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); overflow: hidden; background: white; margin: 0;">
+                {% if user.profile.image %}
+                    <img id="profile-preview" src="{{ user.profile.image.url }}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
+                {% else %}
+                    <div id="profile-initial" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #C62828; font-size: 40px; font-weight: 700; color: white;">
+                        {{ user.first_name.0|upper }}
+                    </div>
+                    <img id="profile-preview" src="" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                {% endif %}
+            </div>
+            <!-- Plus Icon Overlay -->
+            <div class="plus-icon-overlay" style="position: absolute; bottom: 0; right: 0; background: #C62828; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.2); transition: all 0.3s;">
+                <i class="fa-solid fa-plus" style="font-size: 12px;"></i>
+            </div>
+        </div>
+        <h2 style="font-size: 22px; margin-bottom: 0;">{{ user.first_name }}</h2>
+    </div>
+
+    <div class="profile-body">
+        {% if user.profile.is_donor %}
+        <div class="availability-box">
+            <div>
+                <h4 style="font-size: 16px; margin-bottom: 3px;">Available for Donation</h4>
+                <p style="font-size: 12px; color: #888;">If turned off, you won't appear in search results.</p>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="avail-toggle" {% if user.profile.available %}checked{% endif %} onchange="toggleAvailability()">
+                <span class="slider"></span>
+            </label>
+        </div>
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data" id="profile-form">
+            {% csrf_token %}
+            <input type="file" id="profile-image-input" name="image" style="display: none;" onchange="previewImage(this)">
+            <div class="form-grid">
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>Full Name</label>
+                    <input type="text" name="full_name" value="{{ user.first_name }}" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" value="{{ user.username }}" class="form-control" disabled style="background-color: #f1f2f6; cursor: not-allowed; opacity: 0.8;">
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" name="email" value="{{ user.email }}" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="phone" name="phone_number" value="{{ user.profile.phone_number }}" class="form-control" maxlength="10" required>
+                </div>
+                <div class="form-group">
+                    <label>City</label>
+                    <select name="city" class="form-control" required>
+                        {% for city in cities %}
+                        <option value="{{ city.name }}" {% if user.profile.city == city.name %}selected{% endif %}>{{ city.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% if user.profile.is_donor %}
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>Blood Group (Read-only)</label>
+                    <input type="text" value="{{ user.profile.blood_group }}" class="form-control" disabled style="background-color: #f1f2f6; cursor: not-allowed; opacity: 0.8;">
+                </div>
+                {% endif %}
+            </div>
+
+            <div style="margin-top: 15px; display: flex; gap: 15px;">
+                <button type="submit" class="btn btn-primary" style="flex: 2; height: 48px; justify-content: center; font-size: 16px; border-radius: 12px;">SAVE CHANGES</button>
+                <button type="button" class="btn" style="flex: 1; height: 48px; border: 1px solid #ddd; justify-content: center; font-size: 14px; border-radius: 12px;" onclick="document.getElementById('pass-modal').style.display='flex'">CHANGE PASSWORD</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Password Modal -->
+<div id="pass-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+    <div class="card" style="width: 100%; max-width: 450px; padding: 40px; position: relative;">
+        <h3 style="margin-bottom: 25px;">Update Password</h3>
+        <form action="{% url 'change_password' %}" method="POST">
+            {% csrf_token %}
+            <div class="form-group" style="position: relative;">
+                <label>Current Password</label>
+                <input type="password" name="old_password" id="old_password" class="form-control" style="padding-right: 50px;" required>
+                <i class="fa-solid fa-eye-slash toggle-pass" data-target="old_password" style="position: absolute; right: 15px; top: 43px; cursor: pointer; color: #666; font-size: 16px; z-index: 10;"></i>
+            </div>
+            <div class="form-group" style="position: relative;">
+                <label>New Password</label>
+                <input type="password" name="new_password" id="new_password" class="form-control" style="padding-right: 50px;" required>
+                <i class="fa-solid fa-eye-slash toggle-pass" data-target="new_password" style="position: absolute; right: 15px; top: 43px; cursor: pointer; color: #666; font-size: 16px; z-index: 10;"></i>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="submit" class="btn btn-primary" style="flex: 1; justify-content: center;">UPDATE</button>
+                <button type="button" class="btn" style="flex: 1; border: 1px solid #eee; justify-content: center;" onclick="document.getElementById('pass-modal').style.display='none'">CANCEL</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const phoneInput = document.querySelector("#phone");
+    const iti = window.intlTelInput(phoneInput, {
+        initialCountry: "pk",
+        separateDialCode: true,
+        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+    });
+
+    // Parse and set the existing phone number on page load
+    const initialPhoneVal = phoneInput.value;
+    if (initialPhoneVal) {
+        iti.setNumber(initialPhoneVal);
+    }
+
+    // Restrict input to digits only
+    phoneInput.addEventListener('input', function() {
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
+
+    document.getElementById('profile-form').onsubmit = function(e) {
+        const cleanNumber = phoneInput.value.replace(/[^0-9]/g, '');
+        const isFallbackValid = /^[0-9]{9,12}$/.test(cleanNumber);
+        
+        let isLibraryValid = false;
+        try {
+            isLibraryValid = iti.isValidNumber();
+        } catch (err) {
+            isLibraryValid = false;
+        }
+
+        if (!isLibraryValid && !isFallbackValid) {
+            alert("Please enter a valid phone number.");
+            e.preventDefault();
+            return false;
+        }
+        
+        let fullNumber = iti.getNumber();
+        if (!fullNumber) {
+            const countryData = iti.getSelectedCountryData();
+            const dialCode = countryData.dialCode ? '+' + countryData.dialCode : '+92';
+            fullNumber = dialCode + cleanNumber;
+        }
+        phoneInput.value = fullNumber;
+    };
+
+    document.querySelectorAll('.toggle-pass').forEach(item => {
+        item.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const targetInput = document.getElementById(targetId);
+            const type = targetInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            targetInput.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+    });
+
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('profile-preview');
+                const initial = document.getElementById('profile-initial');
+                
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                if (initial) {
+                    initial.style.display = 'none';
+                }
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function toggleAvailability() {
+        fetch("{% url 'toggle_availability' %}")
+        .then(response => response.json())
+        .then(data => {
+            if(data.status === 'success') {
+                const msg = data.available ? "You are now available for donation!" : "Availability turned off.";
+                alert(msg);
+            }
+        });
+    }
+</script>
+{% endblock %}

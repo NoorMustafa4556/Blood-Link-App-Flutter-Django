@@ -1,0 +1,129 @@
+{% extends 'main.html' %}
+
+{% block extra_css %}
+<style>
+    .req-card {
+        background: white;
+        padding: 25px;
+        border-radius: 20px;
+        margin-bottom: 25px;
+        border: 1px solid #eee;
+        box-shadow: var(--shadow);
+    }
+    .req-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #f1f1f1;
+    }
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+    .info-item label {
+        display: block;
+        font-size: 12px;
+        color: #888;
+        margin-bottom: 5px;
+    }
+    .info-item p {
+        font-weight: 700;
+        font-size: 16px;
+    }
+    .message-box {
+        background: #f9f9f9;
+        padding: 15px;
+        border-radius: 12px;
+        border-left: 4px solid var(--primary);
+        margin-bottom: 25px;
+    }
+    .action-btns {
+        display: flex;
+        gap: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h1>Received Requests</h1>
+</div>
+
+{% for req in requests %}
+    <div class="req-card">
+        <div class="req-header">
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <div style="position: relative; width: 50px; height: 50px;">
+                    {% if req.sender.profile.image %}
+                    <img src="{{ req.sender.profile.image.url }}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #eee;" />
+                    {% else %}
+                    <div style="width: 50px; height: 50px; border-radius: 50%; background: #f1f2f6; display: flex; align-items: center; justify-content: center; border: 2px solid #eee;">
+                        <i class="fa-solid fa-user" style="color: #ccc; font-size: 20px;"></i>
+                    </div>
+                    {% endif %}
+                    <div style="position: absolute; bottom: -5px; right: -5px; background: var(--primary); color: white; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; border: 1.5px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
+                        {{ req.blood_group }}
+                    </div>
+                </div>
+                <div>
+                    <h3 style="font-size: 20px;">{{ req.patient_name }}</h3>
+                    <p style="color: #888; font-size: 13px;">Requested by: {{ req.sender.first_name|default:req.sender.username }} | {{ req.created_at|date:"d M, h:i A" }}</p>
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <span class="badge" style="background: {% if req.status == 'Accepted' %}#E8F5E9; color: #2E7D32{% elif req.status == 'Pending' %}#FFF3E0; color: #EF6C00{% else %}#FFEBEE; color: #C62828{% endif %}; padding: 8px 16px; border-radius: 20px; font-weight: 700;">
+                    {{ req.status }}
+                </span>
+            </div>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-item">
+                <label>Hospital</label>
+                <p style="display: flex; align-items: center; gap: 6px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary);"><path d="M18 22H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2z"></path><path d="M12 6v8"></path><path d="M8 10h8"></path></svg>
+                    {{ req.hospital_name }}
+                </p>
+            </div>
+            <div class="info-item">
+                <label>City</label>
+                <p><i class="fa-solid fa-location-dot" style="color: var(--primary); margin-right: 8px;"></i> {{ req.city }}</p>
+            </div>
+            <div class="info-item">
+                <label>Time Needed</label>
+                <p><i class="fa-solid fa-clock" style="color: var(--primary); margin-right: 8px;"></i> {{ req.time_duration }}</p>
+            </div>
+        </div>
+
+        <div class="message-box">
+            <label style="font-size: 11px; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 8px; display: block;">Recipient Message</label>
+            <p>{{ req.message|default:"No message provided." }}</p>
+        </div>
+
+        {% if req.status == 'Pending' %}
+            <form action="{% url 'update_request_status' request_id=req.id status='Accepted' %}" method="POST" class="action-btns">
+                {% csrf_token %}
+                <div style="flex: 1;">
+                    <input type="text" name="donor_response" placeholder="Any message for the recipient? (Optional)" class="btn" style="width: 100%; border: 1px solid #ddd; background: #f9f9f9; text-align: left; height: 48px; margin-bottom: 10px;">
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit" name="status" value="Accepted" class="btn btn-primary" style="flex: 1; justify-content: center; background: #2E7D32;">ACCEPT REQUEST</button>
+                        <button type="submit" formaction="{% url 'update_request_status' request_id=req.id status='Rejected' %}" class="btn" style="flex: 1; justify-content: center; background: #FFEBEE; color: #C62828;">REJECT</button>
+                    </div>
+                </div>
+            </form>
+        {% elif req.donor_response %}
+            <div style="background: #E8F5E9; padding: 15px; border-radius: 12px; color: #2E7D32; font-weight: 500;">
+                <i class="fa-solid fa-check-double"></i> <strong>Your Response:</strong> {{ req.donor_response }}
+            </div>
+        {% endif %}
+    </div>
+{% empty %}
+    <div style="text-align: center; padding: 100px 0;">
+        <i class="fa-solid fa-bell-slash" style="font-size: 64px; color: #eee; margin-bottom: 20px;"></i>
+        <p style="color: #999;">No requests received yet.</p>
+    </div>
+{% endfor %}
+{% endblock %}

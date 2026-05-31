@@ -1,0 +1,153 @@
+{% extends 'main.html' %}
+
+{% block extra_css %}
+<style>
+    .tab-nav {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 30px;
+        background: #eee;
+        padding: 5px;
+        border-radius: 12px;
+        width: fit-content;
+    }
+    .tab-btn {
+        padding: 10px 20px;
+        border-radius: 10px;
+        cursor: pointer;
+        border: none;
+        background: transparent;
+        font-weight: 600;
+        color: #666;
+        transition: all 0.3s;
+    }
+    .tab-btn.active {
+        background: white;
+        color: var(--primary);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .history-card {
+        background: white;
+        padding: 20px 25px;
+        border-radius: 18px;
+        margin-bottom: 15px;
+        border: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s;
+    }
+    .history-card:hover {
+        border-color: var(--primary);
+        transform: translateX(5px);
+    }
+    .status-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 8px;
+    }
+    .status-Pending { background: #F57F17; }
+    .status-Accepted { background: #2E7D32; }
+    .status-Rejected { background: #C62828; }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-content {
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        position: relative;
+    }
+    .close-modal {
+        position: absolute;
+        right: 20px;
+        top: 20px;
+        font-size: 24px;
+        cursor: pointer;
+        color: #999;
+    }
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #f5f5f5;
+    }
+    .detail-label { font-weight: 600; color: #666; }
+    .detail-value { font-weight: 700; color: #333; }
+</style>
+<script>
+    function filterTab(status) {
+        const btns = document.querySelectorAll('.tab-btn');
+        btns.forEach(b => b.classList.remove('active'));
+        // Use currentTarget to ensure we get the button even if clicking icon
+        event.currentTarget.classList.add('active');
+
+        const cards = document.querySelectorAll('.history-card');
+        cards.forEach(c => {
+            if (status === 'all' || c.getAttribute('data-status') === status) {
+                c.style.display = 'flex';
+            } else {
+                c.style.display = 'none';
+            }
+        });
+    }
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h1>My Request History</h1>
+</div>
+
+<div class="tab-nav">
+    <button class="tab-btn active" onclick="filterTab('all')">All</button>
+    <button class="tab-btn" onclick="filterTab('Pending')">Pending</button>
+    <button class="tab-btn" onclick="filterTab('Accepted')">Accepted</button>
+    <button class="tab-btn" onclick="filterTab('Rejected')">Rejected</button>
+</div>
+
+<div id="request-list">
+    {% for req in requests %}
+        <a href="{% url 'request_detail' req.id %}" class="history-card" data-status="{{ req.status }}" style="text-decoration: none; color: inherit;">
+            <div style="display: flex; gap: 20px; align-items: center;">
+                <div style="background: var(--primary-light); color: var(--primary); width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 700;">
+                    {{ req.blood_group }}
+                </div>
+                <div>
+                    <h3 style="font-size: 18px;">{{ req.patient_name }}</h3>
+                    <p style="color: #888; font-size: 13px;">Sent to: {{ req.receiver.first_name }} | {{ req.created_at|date:"d M Y" }}</p>
+                </div>
+            </div>
+            
+            <div style="text-align: right;">
+                <span style="font-weight: 700; font-size: 14px; color: {% if req.status == 'Accepted' %}#2E7D32{% elif req.status == 'Pending' %}#F57F17{% elif req.status == 'Rejected' %}#C62828{% else %}#888{% endif %};">
+                    <span class="status-dot status-{{ req.status }}"></span> {{ req.status }}
+                </span>
+                <p style="font-size: 11px; color: #999; margin-top: 4px;">{{ req.hospital_name }}</p>
+            </div>
+        </a>
+    {% empty %}
+        <div style="text-align: center; padding: 100px 0;">
+            <i class="fa-solid fa-folder-open" style="font-size: 64px; color: #eee; margin-bottom: 20px;"></i>
+            <p style="color: #999;">No history found.</p>
+        </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

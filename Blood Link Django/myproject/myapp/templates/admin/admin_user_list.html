@@ -1,0 +1,52 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block content %}
+<div style="text-align: center; margin-bottom: 40px;">
+    <h1 style="font-size: 36px; font-weight: 800; color: #2b2d42;">
+        {% if current_role == 'donor' %}Active Donors{% elif current_role == 'recipient' %}Recipients{% else %}All Registered Users{% endif %}
+    </h1>
+    <p style="color: #888;">
+        {% if current_role == 'donor' %}Showing all registered blood donors{% elif current_role == 'recipient' %}Showing all registered recipients{% else %}Manage all users in the system{% endif %}
+    </p>
+    <div style="margin-top: 20px;">
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-white" style="border: 1px solid #ddd;"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px;">
+    {% for u in users %}
+    <a href="{% url 'admin_user_detail' u.id %}" class="card" style="text-align: center; text-decoration: none; color: inherit; transition: all 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateY(-10px)'; this.style.borderColor='var(--primary)'" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='#f0f0f0'">
+        <div style="width: 80px; height: 80px; border-radius: 50%; background: #f1f1f1; margin: 0 auto 20px; overflow: hidden; border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+            {% if u.profile.image %}
+                <img src="{{ u.profile.image.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+            {% else %}
+                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: {% if u.is_superuser %}#2b2d42{% elif u.profile.is_donor %}#38b000{% else %}#3a86ff{% endif %}; color: white; font-size: 32px; font-weight: 800;">
+                    {{ u.username.0|upper }}
+                </div>
+            {% endif %}
+        </div>
+        <h3 style="font-size: 20px; margin-bottom: 5px;">{{ u.first_name|default:u.username }}</h3>
+        <p style="color: #888; font-size: 14px; margin-bottom: 15px;">@{{ u.username }}</p>
+        
+        <div style="margin-bottom: 20px;">
+            {% if u.is_superuser %}
+                <span style="background: #2b2d42; color: white; padding: 6px 15px; border-radius: 20px; font-size: 12px; font-weight: 700;">Admin</span>
+            {% else %}
+                <span style="background: {% if u.profile.is_donor %}#E8F5E9; color: #2E7D32{% else %}#E3F2FD; color: #1565C0{% endif %}; padding: 6px 15px; border-radius: 20px; font-size: 12px; font-weight: 700;">
+                    {{ u.profile.is_donor|yesno:"Donor,Recipient" }}
+                </span>
+                {% if u.profile.is_donor %}
+                    <span style="background: #FFEBEE; color: var(--primary); padding: 6px 15px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-left: 5px;">
+                        {{ u.profile.blood_group }}
+                    </span>
+                {% endif %}
+            {% endif %}
+        </div>
+
+        <div class="btn btn-white" style="width: 100%; border: 1px solid #eee; justify-content: center; font-size: 14px;">
+            <i class="fa-solid fa-eye"></i> View Profile
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% endblock %}
