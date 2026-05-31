@@ -27,16 +27,20 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     def get_email(self, obj):
         request = self.context.get('request')
-        if request and request.user.is_authenticated:
-            if obj.user == request.user:
-                return obj.user.email
+        allowed_user = self.context.get('user')
+        if request and request.user and request.user.is_authenticated:
+            allowed_user = request.user
+        if allowed_user and obj.user == allowed_user:
+            return obj.user.email
         return "Hidden (Shared on acceptance)"
 
     def get_phone_number(self, obj):
         request = self.context.get('request')
-        if request and request.user.is_authenticated:
-            if obj.user == request.user:
-                return obj.phone_number
+        allowed_user = self.context.get('user')
+        if request and request.user and request.user.is_authenticated:
+            allowed_user = request.user
+        if allowed_user and obj.user == allowed_user:
+            return obj.phone_number
         return "Hidden (Shared on acceptance)"
 
     def get_has_pending_request(self, obj):

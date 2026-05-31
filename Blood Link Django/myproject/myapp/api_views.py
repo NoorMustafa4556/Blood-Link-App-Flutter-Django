@@ -16,7 +16,10 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
-        serializer = UserSerializer(self.user, context={'request': self.context.get('request')}).data
+        serializer = UserSerializer(self.user, context={
+            'request': self.context.get('request'),
+            'user': self.user
+        }).data
         for k, v in serializer.items():
             data[k] = v
         return data
@@ -87,7 +90,7 @@ def register_user(request):
             
         profile.save()
         
-        serializer = UserSerializer(user, many=False, context={'request': request})
+        serializer = UserSerializer(user, many=False, context={'request': request, 'user': user})
         return Response(serializer.data)
     except Exception as e:
         message = {'detail': str(e)}
@@ -150,7 +153,12 @@ def get_my_requests(request):
     role = request.query_params.get('role', 'receiver' if user.profile.is_donor else 'sender')
     status_filter = request.query_params.get('status', 'Pending') # Default to Pending for Home
     
-    if role == 'receiver':
+    if role == 'all':
+        # History Screen: fetch BOTH sent and received requests for the user
+        requests = BloodRequest.objects.filter(
+            Q(sender=user) | Q(receiver=user)
+        ).order_by('-created_at')
+    elif role == 'receiver':
         requests = BloodRequest.objects.filter(receiver=user).order_by('-created_at')
     else:
         requests = BloodRequest.objects.filter(sender=user).order_by('-created_at')
@@ -159,8 +167,9 @@ def get_my_requests(request):
     if status_filter == 'Pending':
         if role == 'receiver':
             requests = requests.filter(status='Pending')
+        elif role == 'all':
+            pass  # Return all statuses for History
         else:
-            from django.db.models import Q
             requests = requests.filter(Q(status='Pending') | Q(status__in=['Accepted', 'Rejected'], sender_acknowledged=False))
     elif status_filter == 'History':
         # For History screen, we return all statuses (Pending, Accepted, Rejected, etc.)
@@ -180,6 +189,7 @@ def get_my_requests(request):
                 
     serializer = BloodRequestSerializer(requests, many=True)
     return Response(serializer.data)
+
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
@@ -247,7 +257,7 @@ def update_profile(request):
         
     profile.save()
     
-    serializer = UserSerializer(user, many=False, context={'request': request})
+    serializer = UserSerializer(user, many=False, context={'request': request, 'user': user})
     return Response(serializer.data)
 
 @api_view(['POST'])
