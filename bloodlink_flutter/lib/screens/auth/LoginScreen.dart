@@ -48,7 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Center(
               child: Column(
                 children: [
-                  const Icon(Icons.water_drop, size: 80, color: Color(0xFFC62828)),
+                  const Icon(Icons.bloodtype, size: 80, color: Color(0xFFC62828)),
                   const SizedBox(height: 16),
                   const Text(
                     'Welcome Back,',
@@ -83,6 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     TextFormField(
                       controller: _usernameController,
                       textInputAction: TextInputAction.next,
+                      onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
                       decoration: _inputDecoration('Username', Icons.person_outline),
                       validator: (v) => v!.isEmpty ? 'Enter username' : null,
                     ),

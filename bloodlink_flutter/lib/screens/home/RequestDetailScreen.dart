@@ -62,9 +62,13 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
       scheme: 'tel',
       path: phoneNumber,
     );
-    if (await canLaunchUrl(launchUri)) {
-      await launchUrl(launchUri);
-    } else {
+    try {
+      if (await canLaunchUrl(launchUri)) {
+        await launchUrl(launchUri, mode: LaunchMode.externalApplication);
+      } else {
+        await launchUrl(launchUri, mode: LaunchMode.externalApplication); // fallback attempt
+      }
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Could not launch dialer')),
@@ -184,7 +188,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                         ),
                         if (phone != null) ...[
                           const SizedBox(width: 8),
-                          const Icon(Icons.phone_enabled_outlined, color: Colors.green),
+                          const Icon(Icons.call, color: Colors.green),
                         ],
                       ],
                     ),

@@ -137,9 +137,7 @@ flutter pub get
 flutter run
 ```
 
-> **Viva Tip:** Turn on your mobile hotspot → connect laptop → run server with `0.0.0.0:8000` → install APK on phone. Everything works **without internet data**!
 
----
 
 ## 📸 App Screenshots – Mobile Application
 
@@ -248,6 +246,51 @@ A passionate **Flutter Developer** and **Django Developer** from **Bahawalpur, P
   <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white"/>
   <img src="https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=postman&logoColor=white"/>
 </p>
+## 🚀 Setup & Installation
+
+### 1. Navigate to project
+```bash
+cd "Blood Link Django/myproject"
+```
+
+### 2. Install dependencies
+```bash
+pip install -r ../requirements.txt
+```
+
+### 3. Run migrations (auto-seeds cities & blood groups)
+```bash
+python manage.py migrate
+```
+
+### 4. Create admin account
+```bash
+python manage.py createsuperuser
+```
+
+### 5. Start server (expose to local network)
+```bash
+python manage.py runserver 0.0.0.0:8000
+```
+
+- Web Portal: `http://localhost:8000`
+- Admin Panel: `http://localhost:8000/admin-panel/`
+- Django Default Admin: `http://localhost:8000/admin/`
+
+---
+### 3. Install Packages & Run
+
+```bash
+flutter pub get
+flutter run
+```
+
+To build a release APK:
+```bash
+flutter build apk --release
+```
+
+---
 
 **📫 Let's Connect:**
 

@@ -96,12 +96,16 @@ class _RequestBloodFormState extends State<RequestBloodForm> {
               const SizedBox(height: 24),
               TextFormField(
                 controller: _patientNameController,
+                textInputAction: TextInputAction.next,
+                onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
                 decoration: _inputDecoration('Patient Name', Icons.person),
                 validator: (v) => v == null || v.isEmpty ? 'Required' : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _hospitalController,
+                textInputAction: TextInputAction.next,
+                onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
                 decoration: _inputDecoration(
                   'Hospital Name',
                   Icons.local_hospital,

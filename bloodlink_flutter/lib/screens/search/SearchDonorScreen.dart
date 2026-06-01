@@ -18,6 +18,15 @@ class _SearchDonorScreenState extends State<SearchDonorScreen> {
   final _searchController = TextEditingController();
   bool _hasSearched = false;
 
+  @override
+  void initState() {
+    super.initState();
+    // Fetch latest cities when search screen opens so newly added cities appear
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<BloodProvider>(context, listen: false).fetchCitiesAndBloodGroups();
+    });
+  }
+
   void _onSearch(String city) {
     if (city.trim().isEmpty) return;
     setState(() => _hasSearched = true);
@@ -174,6 +183,12 @@ class _SearchDonorScreenState extends State<SearchDonorScreen> {
                               String? imageUrl = donor.fullImageUrl;
 
                               final hasPending = donor.hasPendingRequest;
+                              final isUnavailable = !donor.available;
+                              final isDisabled = hasPending || isUnavailable;
+                              
+                              String buttonText = 'Details';
+                              if (hasPending) buttonText = 'Pending';
+                              else if (isUnavailable) buttonText = 'Off';
 
                               return Container(
                                 margin: const EdgeInsets.only(bottom: 16),
@@ -189,7 +204,7 @@ class _SearchDonorScreenState extends State<SearchDonorScreen> {
                                   ],
                                 ),
                                 child: Opacity(
-                                  opacity: hasPending ? 0.6 : 1.0,
+                                  opacity: isDisabled ? 0.6 : 1.0,
                                   child: ListTile(
                                     contentPadding: const EdgeInsets.all(12),
                                     leading: Container(
@@ -202,7 +217,7 @@ class _SearchDonorScreenState extends State<SearchDonorScreen> {
                                             ? DecorationImage(
                                                 image: NetworkImage(imageUrl), 
                                                 fit: BoxFit.cover,
-                                                colorFilter: hasPending 
+                                                colorFilter: isDisabled 
                                                     ? const ColorFilter.mode(Colors.grey, BlendMode.saturation)
                                                     : null,
                                               )
@@ -228,7 +243,7 @@ class _SearchDonorScreenState extends State<SearchDonorScreen> {
                                       ],
                                     ),
                                     trailing: ElevatedButton(
-                                      onPressed: hasPending ? null : () {
+                                      onPressed: isDisabled ? null : () {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
@@ -237,12 +252,12 @@ class _SearchDonorScreenState extends State<SearchDonorScreen> {
                                         );
                                       },
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: hasPending ? Colors.grey[200] : Colors.white,
-                                        foregroundColor: hasPending ? Colors.grey : Colors.red,
-                                        side: BorderSide(color: hasPending ? Colors.transparent : Colors.red),
+                                        backgroundColor: isDisabled ? Colors.grey[200] : Colors.white,
+                                        foregroundColor: isDisabled ? Colors.grey : Colors.red,
+                                        side: BorderSide(color: isDisabled ? Colors.transparent : Colors.red),
                                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                       ),
-                                      child: Text(hasPending ? 'Pending' : 'Details'),
+                                      child: Text(buttonText),
                                     ),
                                   ),
                                 ),

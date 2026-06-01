@@ -66,7 +66,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                   color: Colors.white,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.water_drop, size: 80, color: Color(0xFFC62828)),
+                child: const Icon(Icons.bloodtype, size: 80, color: Color(0xFFC62828)),
               ),
             ),
             const SizedBox(height: 24),

@@ -157,6 +157,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   FilteringTextInputFormatter.digitsOnly,
                   LengthLimitingTextInputFormatter(10),
                 ],
+                onSubmitted: (_) => FocusScope.of(context).nextFocus(),
                 onChanged: (phone) => _phoneNumber = phone.completeNumber,
                 validator: (phone) {
                   if (phone == null || phone.number.trim().isEmpty) {
@@ -216,6 +217,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
               ),
               const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("Already have an account?", style: TextStyle(color: Colors.grey, fontSize: 15)),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Login', style: TextStyle(color: Colors.red, fontSize: 15, fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -228,6 +240,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       controller: controller,
       keyboardType: type,
       textInputAction: TextInputAction.next,
+      onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
       decoration: _inputDecoration(label, icon),
       validator: validator,
     );

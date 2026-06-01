@@ -11,7 +11,7 @@ class UserProfile {
   final bool available;
   final String? fullName;
   final String? email; // Added this
-  final bool hasPendingRequest;
+  bool hasPendingRequest;
 
   UserProfile({
     required this.id,

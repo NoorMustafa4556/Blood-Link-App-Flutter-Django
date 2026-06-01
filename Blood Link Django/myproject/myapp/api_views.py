@@ -250,7 +250,11 @@ def update_profile(request):
     profile.phone_number = data.get('phone_number', profile.phone_number)
     profile.city = data.get('city', profile.city)
     if 'available' in data:
-        profile.available = data.get('available')
+        val = data.get('available')
+        if isinstance(val, str):
+            profile.available = val.lower() == 'true'
+        else:
+            profile.available = bool(val)
     
     if 'image' in request.FILES:
         profile.image = request.FILES['image']

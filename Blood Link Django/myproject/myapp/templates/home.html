@@ -34,7 +34,7 @@
 <div class="grid">
     {% for group in blood_groups %}
     <a href="{% url 'search_donors' %}?blood_group={{ group }}" class="card" style="text-decoration: none; text-align: center;">
-        <i class="fa-solid fa-droplet" style="font-size: 40px; color: var(--primary); margin-bottom: 15px;"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" height="40px" viewBox="0 0 24 24" width="40px" fill="var(--primary)" style="margin-bottom: 15px;"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M12 2c-5.33 4.55-8 8.48-8 11.8 0 4.98 3.8 8.2 8 8.2s8-3.22 8-8.2c0-3.32-2.67-7.25-8-11.8zm3 16H9v-2h6v2zm0-5h-2v2h-2v-2H9v-2h2v-2h2v2h2v2z"/></svg>
         <h2 style="font-size: 24px; color: #333;">{{ group }}</h2>
         <p style="color: #888; font-size: 14px; margin-top: 5px;">Search Donors</p>
     </a>

@@ -4,6 +4,7 @@ import '../models/BloodRequest.dart';
 import '../models/User.dart';
 import '../services/ApiService.dart';
 import '../utils/Constants.dart';
+import 'package:dio/dio.dart';
 
 class BloodProvider with ChangeNotifier {
   List<UserProfile> _donors = [];
@@ -96,13 +97,31 @@ class BloodProvider with ChangeNotifier {
     notifyListeners();
     try {
       await _apiService.sendBloodRequest(data);
+      
+      // Update local state immediately
+      int receiverId = data['receiver_id'];
+      int idx = _donors.indexWhere((d) => d.id == receiverId);
+      if (idx != -1) {
+        _donors[idx].hasPendingRequest = true;
+      }
+
       _isLoading = false;
       notifyListeners();
       return null;
+    } on DioException catch (e) {
+      _isLoading = false;
+      notifyListeners();
+      if (e.response != null && e.response!.data != null) {
+        final resp = e.response!.data;
+        if (resp is Map && resp.containsKey('error')) {
+          return resp['error'].toString();
+        }
+      }
+      return 'Failed to send request. It may already be pending.';
     } catch (e) {
       _isLoading = false;
       notifyListeners();
-      return e.toString();
+      return 'An unexpected error occurred.';
     }
   }
 

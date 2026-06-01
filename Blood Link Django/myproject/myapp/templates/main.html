@@ -217,7 +217,7 @@
     {% if user.is_authenticated %}
     <aside class="sidebar">
         <div class="logo">
-            <i class="fa-solid fa-droplet"></i>
+            <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 24 24" width="1em" fill="currentColor" style="vertical-align: -0.125em;"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M12 2c-5.33 4.55-8 8.48-8 11.8 0 4.98 3.8 8.2 8 8.2s8-3.22 8-8.2c0-3.32-2.67-7.25-8-11.8zm3 16H9v-2h6v2zm0-5h-2v2h-2v-2H9v-2h2v-2h2v2h2v2z"/></svg>
             <span>BloodLink</span>
         </div>
 
@@ -319,6 +319,28 @@
                 closeModal();
             }
         }
+
+        // Focus next input on Enter key press
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const target = e.target;
+                if (target.tagName === 'INPUT' || target.tagName === 'SELECT') {
+                    if (target.type !== 'submit' && target.type !== 'button') {
+                        e.preventDefault();
+                        const form = target.form;
+                        if (form) {
+                            const focusable = Array.from(form.querySelectorAll('input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled])'));
+                            const index = focusable.indexOf(target);
+                            if (index > -1 && index < focusable.length - 1) {
+                                focusable[index + 1].focus();
+                            } else {
+                                form.submit();
+                            }
+                        }
+                    }
+                }
+            }
+        });
     </script>
 </body>
 </html>

@@ -144,6 +144,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               TextFormField(
                 controller: _fullNameController,
                 textInputAction: TextInputAction.next,
+                onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
                 decoration: _inputDecoration('Full Name', Icons.person_outline),
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) return 'Please enter your full name';
@@ -164,6 +165,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
+                onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
                 decoration: _inputDecoration('Email Address', Icons.email_outlined),
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) return 'Please enter your email address';
@@ -183,6 +185,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   FilteringTextInputFormatter.digitsOnly,
                   LengthLimitingTextInputFormatter(10),
                 ],
+                onSubmitted: (_) => FocusScope.of(context).nextFocus(),
                 onChanged: (phone) => _completePhoneNumber = phone.completeNumber,
                 validator: (phone) {
                   if (phone == null || phone.number.trim().isEmpty) {

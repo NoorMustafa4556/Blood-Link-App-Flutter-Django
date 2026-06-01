@@ -1,5 +1,6 @@
 class AppConstants {
   static const List<String> cities = [
+    'Ahmed Pur',
     'Bahawalpur',
     'Dera Ghazi Khan',
     'Faisalabad',
@@ -10,6 +11,7 @@ class AppConstants {
     'Karachi',
     'Kasur',
     'Lahore',
+    'Liaquat Pur',
     'Mardan',
     'Multan',
     'Okara',

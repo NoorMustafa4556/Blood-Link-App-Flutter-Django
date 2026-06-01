@@ -460,6 +460,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         TextFormField(
                           controller: oldPasswordController,
                           obscureText: obscureOld,
+                          textInputAction: TextInputAction.next,
+                          onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
                           decoration: InputDecoration(
                             labelText: 'Current Password',
                             prefixIcon: const Icon(Icons.lock_outline),
@@ -480,6 +482,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         TextFormField(
                           controller: newPasswordController,
                           obscureText: obscureNew,
+                          textInputAction: TextInputAction.next,
+                          onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
                           decoration: InputDecoration(
                             labelText: 'New Password',
                             prefixIcon: const Icon(Icons.lock_open),
@@ -503,6 +507,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         TextFormField(
                           controller: confirmPasswordController,
                           obscureText: obscureConfirm,
+                          textInputAction: TextInputAction.done,
                           decoration: InputDecoration(
                             labelText: 'Confirm New Password',
                             prefixIcon: const Icon(Icons.lock_outline),
