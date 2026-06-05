@@ -127,11 +127,20 @@ class BloodProvider with ChangeNotifier {
 
   Future<void> updateRequestStatus(int id, String status, {String? message}) async {
     try {
-      await _apiService.updateRequestStatus(id, status, message: message);
+      await _apiService.updateRequestStatus(id, status, message: message ?? '');
       // Refresh the list after update
       await fetchMyRequests('receiver');
     } catch (e) {
       debugPrint('Update Request Error: $e');
+    }
+  }
+
+  Future<void> recipientRequestAction(int id, String action) async {
+    try {
+      await _apiService.recipientRequestAction(id, action);
+      await fetchMyRequests('sender'); // Refresh sender's list
+    } catch (e) {
+      debugPrint('Recipient Action Error: $e');
     }
   }
 }

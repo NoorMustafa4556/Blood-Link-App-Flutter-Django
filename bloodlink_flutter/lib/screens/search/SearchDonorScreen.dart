@@ -5,6 +5,7 @@ import '../home/RequestBloodForm.dart';
 import '../../utils/Config.dart';
 import '../../utils/Constants.dart';
 import 'DonorProfileScreen.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class SearchDonorScreen extends StatefulWidget {
   final String bloodGroup;
@@ -215,7 +216,7 @@ class _SearchDonorScreenState extends State<SearchDonorScreen> {
                                         border: Border.all(color: Colors.red.withOpacity(0.2)),
                                         image: imageUrl != null
                                             ? DecorationImage(
-                                                image: NetworkImage(imageUrl), 
+                                                image: CachedNetworkImageProvider(imageUrl), 
                                                 fit: BoxFit.cover,
                                                 colorFilter: isDisabled 
                                                     ? const ColorFilter.mode(Colors.grey, BlendMode.saturation)

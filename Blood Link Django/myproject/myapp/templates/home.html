@@ -77,6 +77,16 @@
 {% endif %}
 
 <div style="margin-top: 40px;">
+    {% if show_health_warning %}
+    <div style="background-color: #fff0f0; border: 1px solid #ffcdd2; border-radius: 12px; padding: 15px 20px; margin-bottom: 25px; display: flex; align-items: flex-start; gap: 15px;">
+        <i class="fa-solid fa-notes-medical" style="color: #d32f2f; font-size: 24px; margin-top: 2px;"></i>
+        <div>
+            <h4 style="color: #c62828; margin-bottom: 5px; font-size: 16px;">Health Standard Warning</h4>
+            <p style="color: #b71c1c; font-size: 14px; margin: 0;">You have recently donated blood. Please turn off your availability toggle for 3 months to maintain health standards.</p>
+        </div>
+    </div>
+    {% endif %}
+
     <h3 style="margin-bottom: 25px; display: flex; align-items: center; gap: 10px;">
         <i class="fa-solid fa-clock-rotate-left" style="color: var(--primary);"></i> 
         {% if is_donor %}Received Requests{% else %}Your Active Requests{% endif %}

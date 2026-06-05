@@ -13,6 +13,7 @@ urlpatterns = [
     path('my-requests/', views.my_requests_view, name='my_requests'),
     path('history/', views.history_view, name='history'),
     path('update-request/<int:request_id>/<str:status>/', views.update_request_status_view, name='update_request_status'),
+    path('recipient-action/<int:request_id>/<str:action>/', views.recipient_action_view, name='recipient_action'),
     path('request-detail/<int:pk>/', views.request_detail_view, name='request_detail'),
     
     # 👤 PROFILE & SETTINGS

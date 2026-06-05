@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .api_views import (
     register_user, get_donors, send_blood_request, 
-    get_my_requests, update_request_status, update_profile, 
+    get_my_requests, update_request_status, recipient_request_action, update_profile, 
     verify_password, change_password_api, MyTokenObtainPairView, get_cities,
     acknowledge_request, get_blood_groups
 )
@@ -20,6 +20,7 @@ urlpatterns = [
     path('requests/send/', send_blood_request, name='api_send_request'),
     path('requests/my/', get_my_requests, name='api_get_my_requests'),
     path('requests/update/', update_request_status, name='api_update_request'),
+    path('requests/recipient-action/', recipient_request_action, name='api_recipient_action'),
     path('requests/acknowledge/', acknowledge_request, name='api_acknowledge_request'),
     
     path('profile/update/', update_profile, name='api_update_profile'),

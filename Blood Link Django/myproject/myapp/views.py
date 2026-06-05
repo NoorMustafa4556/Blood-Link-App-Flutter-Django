@@ -41,13 +41,21 @@ def home_view(request):
     else:
         active_requests = active_requests.filter(sender=request.user)
         recent_responses = BloodRequest.objects.filter(sender=request.user, status__in=['Accepted', 'Rejected'], sender_acknowledged=False).order_by('-created_at')[:5]
+
+    show_health_warning = False
+    if is_donor and request.user.profile.available:
+        show_health_warning = BloodRequest.objects.filter(
+            receiver=request.user,
+            status='Completed'
+        ).exists()
         
     return render(request, 'home.html', {
         'active_requests': active_requests, 
         'recent_responses': recent_responses,
         'blood_groups': blood_groups, 
         'is_donor': is_donor,
-        'current_role': current_role
+        'current_role': current_role,
+        'show_health_warning': show_health_warning,
     })
 
 @login_required
@@ -144,6 +152,20 @@ def request_detail_view(request, pk):
         blood_request.save()
         
     return render(request, 'request_detail.html', {'req': blood_request})
+
+@login_required
+def recipient_action_view(request, request_id, action):
+    blood_request = get_object_or_404(BloodRequest, id=request_id, sender=request.user)
+    if blood_request.status == 'Accepted':
+        blood_request.status = action
+        blood_request.save()
+        if action == 'Completed':
+            messages.success(request, "Request marked as Completed. Thank you for confirming!")
+        else:
+            messages.warning(request, "Donor reported for not arriving.")
+    else:
+        messages.error(request, "Invalid action for this request.")
+    return redirect('history')
 
 @login_required
 def update_request_status_view(request, request_id, status):

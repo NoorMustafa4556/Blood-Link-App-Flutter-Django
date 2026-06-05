@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import '../../providers/AuthProvider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../providers/BloodProvider.dart';
 import '../../utils/Constants.dart';
 
@@ -125,7 +126,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     backgroundColor: Colors.grey[200],
                     backgroundImage: _selectedImage != null
                         ? FileImage(_selectedImage!)
-                        : (imageUrl != null ? NetworkImage(imageUrl) : null),
+                        : (imageUrl != null ? CachedNetworkImageProvider(imageUrl) : null),
                     child: (_selectedImage == null && imageUrl == null)
                         ? const Icon(Icons.person, size: 60, color: Colors.grey)
                         : null,

@@ -7,6 +7,7 @@ import '../../models/BloodRequest.dart';
 import 'RequestDetailScreen.dart';
 import '../../utils/Constants.dart';
 import '../../widgets/CustomDrawer.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,12 +18,29 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool _isDonorMode = false;
+  int _clearedRequestId = -1;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchInitialData();
+      _loadWarningState();
+    });
+  }
+
+  Future<void> _loadWarningState() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _clearedRequestId = prefs.getInt('cleared_request_id') ?? -1;
+    });
+  }
+
+  Future<void> _clearWarningState(int requestId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('cleared_request_id', requestId);
+    setState(() {
+      _clearedRequestId = requestId;
     });
   }
 
@@ -61,8 +79,46 @@ class _HomeScreenState extends State<HomeScreen> {
           if (_isDonorMode)
             Switch(
               value: auth.user?.profile?.available ?? true,
-              onChanged: (v) {
-                auth.updateProfile({'available': v});
+              onChanged: (v) async {
+                if (v) {
+                  // User is turning it ON
+                  final completedRequests = blood.myRequests.where((req) => req.status == 'Completed').toList();
+                  completedRequests.sort((a, b) => b.id.compareTo(a.id));
+                  int latestCompletedId = completedRequests.isNotEmpty ? completedRequests.first.id : -1;
+                  
+                  if (completedRequests.isNotEmpty && _clearedRequestId != latestCompletedId) {
+                    bool? confirmed = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('Health Standard Check'),
+                        content: const Text('Are you sure you have completed 3 months since your last blood donation?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, false),
+                            child: const Text('No'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, true),
+                            child: const Text('Yes', style: TextStyle(color: Colors.red)),
+                          ),
+                        ],
+                      ),
+                    );
+                    
+                    if (confirmed == true) {
+                      await _clearWarningState(latestCompletedId);
+                      auth.updateProfile({'available': true});
+                    } else {
+                      // They clicked No, so keep it OFF
+                      auth.updateProfile({'available': false});
+                    }
+                  } else {
+                    auth.updateProfile({'available': true});
+                  }
+                } else {
+                  // Turning OFF
+                  auth.updateProfile({'available': false});
+                }
               },
               activeColor: Colors.greenAccent,
             ),
@@ -344,8 +400,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildDonorView(BloodProvider blood) {
     if (blood.isLoading) return const Center(child: CircularProgressIndicator());
-    if (blood.myRequests.isEmpty) {
-      return Center(
+    
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    final isAvailable = auth.user?.profile?.available ?? false;
+    final completedRequests = blood.myRequests.where((req) => req.status == 'Completed').toList();
+    completedRequests.sort((a, b) => b.id.compareTo(a.id));
+    int latestCompletedId = completedRequests.isNotEmpty ? completedRequests.first.id : -1;
+    
+    final hasDonated = completedRequests.isNotEmpty;
+    final showWarning = isAvailable && hasDonated && (_clearedRequestId != latestCompletedId);
+
+    final activeList = blood.myRequests.where((req) => req.status == 'Pending').toList();
+
+    Widget content;
+    if (activeList.isEmpty) {
+      content = Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -355,13 +424,13 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       );
-    }
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: blood.myRequests.length,
-      itemBuilder: (context, index) {
-        final req = blood.myRequests[index];
-        final minsLeft = req.minutesLeft;
+    } else {
+      content = ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: activeList.length,
+        itemBuilder: (context, index) {
+          final req = activeList[index];
+          final minsLeft = req.minutesLeft;
 
         return Card(
           elevation: 2,
@@ -406,6 +475,43 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         );
       },
+    );
+  }
+
+    if (!showWarning) return content;
+
+    return Column(
+      children: [
+        Container(
+          margin: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.red[50],
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.red[200]!),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.health_and_safety, color: Colors.red[700], size: 30),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Health Standard Warning', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red[800])),
+                    const SizedBox(height: 4),
+                    Text(
+                      'You recently donated blood. Please turn off your availability toggle (top right) for 3 months.',
+                      style: TextStyle(color: Colors.red[900], fontSize: 13),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(child: content),
+      ],
     );
   }
 

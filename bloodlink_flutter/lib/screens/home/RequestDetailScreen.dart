@@ -56,6 +56,18 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
     }
   }
 
+  void _recipientAction(String action) async {
+    setState(() => _isProcessing = true);
+    final blood = Provider.of<BloodProvider>(context, listen: false);
+    await blood.recipientRequestAction(widget.request.id, action);
+    if (mounted) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(action == 'Completed' ? 'Thanks for confirming!' : 'Donor reported.'), backgroundColor: action == 'Completed' ? Colors.green : Colors.orange),
+      );
+    }
+  }
+
   Future<void> _makeCall(String? phoneNumber) async {
     if (phoneNumber == null || phoneNumber.isEmpty) return;
     final Uri launchUri = Uri(
@@ -87,9 +99,16 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
   Widget build(BuildContext context) {
     final primaryColor = Theme.of(context).primaryColor;
     final auth = Provider.of<AuthProvider>(context);
-    final isDonorView = auth.user?.id == widget.request.receiver;
+    final blood = Provider.of<BloodProvider>(context);
     
-    final minutesLeft = widget.request.minutesLeft;
+    // Get latest request status from the provider if available
+    final request = blood.myRequests.firstWhere(
+      (r) => r.id == widget.request.id,
+      orElse: () => widget.request,
+    );
+
+    final bool isDonorView = auth.isDonorMode;
+    final minutesLeft = request.minutesLeft;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -108,21 +127,21 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: widget.request.status == 'Accepted' ? Colors.green[50] : Colors.red[50],
+                color: ['Accepted', 'Completed'].contains(request.status) ? Colors.green[50] : (request.status == 'Pending' ? Colors.orange[50] : Colors.red[50]),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: widget.request.status == 'Accepted' ? Colors.green[100]! : Colors.red[100]!),
+                border: Border.all(color: ['Accepted', 'Completed'].contains(request.status) ? Colors.green[100]! : (request.status == 'Pending' ? Colors.orange[100]! : Colors.red[100]!)),
               ),
               child: Column(
                 children: [
                   Text(
-                    widget.request.status,
+                    request.status,
                     style: TextStyle(
                       fontSize: 24, 
                       fontWeight: FontWeight.bold, 
-                      color: widget.request.status == 'Accepted' ? Colors.green : (widget.request.status == 'Pending' ? Colors.orange : Colors.red)
+                      color: ['Accepted', 'Completed'].contains(request.status) ? Colors.green : (request.status == 'Pending' ? Colors.orange : Colors.red)
                     ),
                   ),
-                  if (widget.request.status == 'Pending' && minutesLeft > 0) ...[
+                  if (request.status == 'Pending' && minutesLeft > 0) ...[
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -140,32 +159,32 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
             
             // Patient & Hospital Info
             _sectionTitle('Blood Requirement'),
-            _infoTile(Icons.bloodtype, 'Blood Group', widget.request.bloodGroup),
-            _infoTile(Icons.person_outline, 'Patient Name', widget.request.patientName),
-            _infoTile(Icons.local_hospital_outlined, 'Hospital', widget.request.hospitalName),
-            _infoTile(Icons.location_city_outlined, 'City', widget.request.city),
+            _infoTile(Icons.bloodtype, 'Blood Group', request.bloodGroup),
+            _infoTile(Icons.person_outline, 'Patient Name', request.patientName),
+            _infoTile(Icons.local_hospital_outlined, 'Hospital', request.hospitalName),
+            _infoTile(Icons.location_city_outlined, 'City', request.city),
             
             const SizedBox(height: 24),
             _sectionTitle(isDonorView ? 'Recipient Details' : 'Donor Details'),
-            _infoTile(Icons.account_circle_outlined, 'Name', isDonorView ? widget.request.senderName : widget.request.receiverName),
+            _infoTile(Icons.account_circle_outlined, 'Name', isDonorView ? request.senderName : request.receiverName),
             
             if (isDonorView) ...[
-              _infoTile(Icons.phone_outlined, 'Phone (Tap to Call)', widget.request.senderPhone ?? 'N/A', onTap: () => _makeCall(widget.request.senderPhone)),
-              _infoTile(Icons.email_outlined, 'Email', widget.request.senderEmail ?? 'N/A'),
-              _infoTile(Icons.location_city_outlined, 'City', widget.request.senderCity ?? 'N/A'),
-            ] else if (widget.request.status == 'Accepted') ...[
+              _infoTile(Icons.phone_outlined, 'Phone (Tap to Call)', request.senderPhone ?? 'N/A', onTap: () => _makeCall(request.senderPhone)),
+              _infoTile(Icons.email_outlined, 'Email', request.senderEmail ?? 'N/A'),
+              _infoTile(Icons.location_city_outlined, 'City', request.senderCity ?? 'N/A'),
+            ] else if (request.status == 'Accepted') ...[
               _infoTile(Icons.phone_outlined, 'Contact', 'Shared in response (See below)'),
             ],
 
             const SizedBox(height: 24),
             _sectionTitle('Request Message'),
-            Text(widget.request.message, style: const TextStyle(fontSize: 16, color: Colors.black87)),
+            Text(request.message, style: const TextStyle(fontSize: 16, color: Colors.black87)),
             
-            if (widget.request.donorResponse != null && widget.request.donorResponse!.isNotEmpty) ...[
+            if (request.donorResponse != null && request.donorResponse!.isNotEmpty) ...[
               const SizedBox(height: 24),
               _sectionTitle('Donor Response'),
               (() {
-                final phone = _extractPhoneNumber(widget.request.donorResponse!);
+                final phone = _extractPhoneNumber(request.donorResponse!);
                 return InkWell(
                   onTap: phone != null ? () => _makeCall(phone) : null,
                   borderRadius: BorderRadius.circular(12),
@@ -182,7 +201,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                       children: [
                         Expanded(
                           child: Text(
-                            widget.request.donorResponse!, 
+                            request.donorResponse!, 
                             style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w500)
                           ),
                         ),
@@ -200,7 +219,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
             const SizedBox(height: 40),
 
             // Donor Actions
-            if (isDonorView && widget.request.status == 'Pending' && minutesLeft > 0) ...[
+            if (isDonorView && request.status == 'Pending' && minutesLeft > 0) ...[
               const Text('Your Response (Optional)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               const SizedBox(height: 8),
               TextField(
@@ -243,6 +262,44 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
                         child: const Text('ACCEPT', style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+
+            if (!isDonorView && request.status == 'Accepted') ...[
+              const SizedBox(height: 24),
+              const Text('Donor Arrival Confirmation', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              const SizedBox(height: 16),
+              if (_isProcessing)
+                const Center(child: CircularProgressIndicator())
+              else
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => _recipientAction('Reported'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.red,
+                          side: const BorderSide(color: Colors.red),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: const Text('DID NOT ARRIVE', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => _recipientAction('Completed'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: const Text('DONATED BLOOD', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                       ),
                     ),
                   ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../providers/AuthProvider.dart';
 import '../../utils/Config.dart';
 
@@ -45,7 +46,7 @@ class ProfileScreen extends StatelessWidget {
                   CircleAvatar(
                     radius: 60,
                     backgroundColor: Colors.white,
-                    backgroundImage: imageUrl != null ? NetworkImage(imageUrl) : null,
+                    backgroundImage: imageUrl != null ? CachedNetworkImageProvider(imageUrl) : null,
                     child: imageUrl == null ? Icon(Icons.person, size: 60, color: primaryColor) : null,
                   ),
                   const SizedBox(height: 16),

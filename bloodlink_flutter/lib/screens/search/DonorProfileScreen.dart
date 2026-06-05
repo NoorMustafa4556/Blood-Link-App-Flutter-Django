@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/User.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../home/RequestBloodForm.dart';
 
 class DonorProfileScreen extends StatelessWidget {
@@ -39,7 +40,7 @@ class DonorProfileScreen extends StatelessWidget {
                   CircleAvatar(
                     radius: 70,
                     backgroundColor: Colors.white,
-                    backgroundImage: imageUrl != null ? NetworkImage(imageUrl) : null,
+                    backgroundImage: imageUrl != null ? CachedNetworkImageProvider(imageUrl) : null,
                     child: imageUrl == null ? Icon(Icons.person, size: 70, color: primaryColor) : null,
                   ),
                   const SizedBox(height: 16),

@@ -77,15 +77,19 @@ class ApiService {
     );
   }
 
-  Future<Response> updateRequestStatus(
-    int id,
-    String status, {
-    String? message,
-  }) async {
-    return await dio.post(
-      '/requests/update/',
-      data: {'id': id, 'status': status, 'message': message},
-    );
+  Future<Response> updateRequestStatus(int id, String status, {String message = ''}) async {
+    return await dio.post('/requests/update/', data: {
+      'id': id,
+      'status': status,
+      'message': message,
+    });
+  }
+
+  Future<Response> recipientRequestAction(int id, String action) async {
+    return await dio.post('/requests/recipient-action/', data: {
+      'id': id,
+      'action': action,
+    });
   }
 
   Future<Response> acknowledgeRequest(int id) async {

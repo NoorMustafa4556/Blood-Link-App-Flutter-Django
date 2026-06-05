@@ -166,7 +166,7 @@ def get_my_requests(request):
     # Filter by status
     if status_filter == 'Pending':
         if role == 'receiver':
-            requests = requests.filter(status='Pending')
+            requests = requests.filter(Q(status='Pending') | Q(status='Accepted') | Q(status='Completed'))
         elif role == 'all':
             pass  # Return all statuses for History
         else:
@@ -230,6 +230,25 @@ def update_request_status(request):
         
     blood_request.save()
     return Response({'detail': f'Request {new_status}'})
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def recipient_request_action(request):
+    user = request.user
+    req_id = request.data.get('id')
+    action = request.data.get('action') # 'Completed' or 'Reported'
+    
+    try:
+        blood_request = BloodRequest.objects.get(id=req_id, sender=user)
+        if blood_request.status != 'Accepted':
+            return Response({'detail': 'Only accepted requests can be modified'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        blood_request.status = action
+        blood_request.save()
+        return Response({'detail': f'Request marked as {action}'})
+    except BloodRequest.DoesNotExist:
+        return Response({'detail': 'Request not found'}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])

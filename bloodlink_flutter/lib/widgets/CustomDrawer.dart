@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/AuthProvider.dart';
 
 class CustomDrawer extends StatelessWidget {
@@ -23,7 +24,7 @@ class CustomDrawer extends StatelessWidget {
             accountEmail: Text(auth.user?.email ?? ''),
             currentAccountPicture: CircleAvatar(
               backgroundColor: Colors.white,
-              backgroundImage: imageUrl != null ? NetworkImage(imageUrl) : null,
+              backgroundImage: imageUrl != null ? CachedNetworkImageProvider(imageUrl) : null,
               child: imageUrl == null
                   ? const Icon(Icons.person, size: 40, color: Colors.grey)
                   : null,

@@ -78,12 +78,13 @@ class _HistoryScreenState extends State<HistoryScreen>
 
   Widget _buildNestedTabView(List<BloodRequest> requests) {
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Column(
         children: [
           Container(
             color: Colors.white,
             child: const TabBar(
+              isScrollable: true,
               labelColor: Colors.red,
               unselectedLabelColor: Colors.grey,
               indicatorColor: Colors.red,
@@ -91,17 +92,19 @@ class _HistoryScreenState extends State<HistoryScreen>
               labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
               tabs: [
                 Tab(text: 'Pending'),
-                Tab(text: 'Accepted'),
+                Tab(text: 'Completed'),
                 Tab(text: 'Rejected'),
+                Tab(text: 'Reported'),
               ],
             ),
           ),
           Expanded(
             child: TabBarView(
               children: [
-                _buildRequestList(requests.where((r) => r.status == 'Pending').toList()),
-                _buildRequestList(requests.where((r) => r.status == 'Accepted').toList()),
-                _buildRequestList(requests.where((r) => r.status == 'Rejected').toList()),
+                _buildRequestList(requests.where((r) => ['Pending', 'Accepted'].contains(r.status)).toList()),
+                _buildRequestList(requests.where((r) => ['Completed', 'Fulfilled'].contains(r.status)).toList()),
+                _buildRequestList(requests.where((r) => ['Rejected', 'Cancelled'].contains(r.status)).toList()),
+                _buildRequestList(requests.where((r) => r.status == 'Reported').toList()),
               ],
             ),
           ),
