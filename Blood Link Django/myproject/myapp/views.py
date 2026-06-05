@@ -17,6 +17,12 @@ def landing_view(request):
     return render(request, 'landing.html')
 
 @login_required
+def switch_role_view(request):
+    current_role = request.session.get('current_role', 'donor' if request.user.profile.is_donor else 'recipient')
+    request.session['current_role'] = 'recipient' if current_role == 'donor' else 'donor'
+    return redirect('home')
+
+@login_required
 def home_view(request):
     if request.user.is_superuser: return redirect('admin_dashboard')
     
@@ -44,10 +50,15 @@ def home_view(request):
 
     show_health_warning = False
     if is_donor and request.user.profile.available:
-        show_health_warning = BloodRequest.objects.filter(
+        latest_completed = BloodRequest.objects.filter(
             receiver=request.user,
             status='Completed'
-        ).exists()
+        ).order_by('-id').first()
+        
+        if latest_completed:
+            cleared_id = request.session.get('cleared_request_id', -1)
+            if cleared_id != latest_completed.id:
+                show_health_warning = True
         
     return render(request, 'home.html', {
         'active_requests': active_requests, 
@@ -241,7 +252,19 @@ def profile_settings_view(request):
     
     ensure_cities()
     cities = City.objects.all()
-    return render(request, 'profile.html', {'cities': cities})
+    
+    needs_health_warning = False
+    latest_completed = BloodRequest.objects.filter(receiver=request.user, status='Completed').order_by('-id').first()
+    if latest_completed:
+        cleared_id = request.session.get('cleared_request_id', -1)
+        if cleared_id != latest_completed.id:
+            needs_health_warning = True
+            
+    return render(request, 'profile.html', {
+        'cities': cities,
+        'needs_health_warning': needs_health_warning,
+        'latest_completed_id': latest_completed.id if latest_completed else -1
+    })
 
 @login_required
 def change_password_view(request):
@@ -261,7 +284,17 @@ def change_password_view(request):
 @login_required
 def toggle_availability_view(request):
     profile = request.user.profile
-    profile.available = not profile.available
+    state = request.GET.get('state')
+    
+    if state is not None:
+        profile.available = state.lower() == 'true'
+    else:
+        profile.available = not profile.available
+        
+    clear_id = request.GET.get('clear_id')
+    if clear_id and clear_id != 'null':
+        request.session['cleared_request_id'] = int(clear_id)
+        
     profile.save()
     return JsonResponse({'status': 'success', 'available': profile.available})
 

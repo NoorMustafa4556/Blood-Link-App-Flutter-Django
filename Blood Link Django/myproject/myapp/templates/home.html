@@ -15,15 +15,11 @@
             </p>
         </div>
         {% if user.profile.is_donor %}
-        <div style="background: #f0f0f0; padding: 5px; border-radius: 12px; display: flex; gap: 5px;">
-            <form action="{% url 'login' %}" method="POST" style="display: inline;">
-                {% csrf_token %}
-                <input type="hidden" name="username" value="{{ user.username }}">
-                <!-- Logic for switching role: we simulate a login or just update session in a real view. 
-                     For simplicity here, we'll assume the user can re-login to switch or we add a specific switch view later.
-                     But based on workflow, they choose at login. -->
-            </form>
-            <p style="font-size: 12px; padding: 5px 15px; color: #888;">Switch Mode via Logout/Login</p>
+        <div style="background: #f0f0f0; padding: 5px; border-radius: 12px; display: flex; align-items: center; gap: 5px;">
+            <a href="{% url 'switch_role' %}" style="text-decoration: none; font-size: 13px; font-weight: bold; background: white; color: var(--primary); padding: 8px 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 5px;">
+                <i class="fa-solid fa-repeat"></i> Switch Mode
+            </a>
+            <p style="font-size: 11px; padding: 0 10px; color: #888; margin: 0;">Click to swap role</p>
         </div>
         {% endif %}
     </div>

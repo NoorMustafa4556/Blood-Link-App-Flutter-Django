@@ -205,12 +205,39 @@
     }
 
     function toggleAvailability() {
-        fetch("{% url 'toggle_availability' %}")
+        const toggle = document.getElementById('avail-toggle');
+        const isTurningOn = toggle.checked;
+
+        if (isTurningOn) {
+            const needsWarning = {{ needs_health_warning|yesno:"true,false" }};
+            if (needsWarning) {
+                if (confirm("Health Standard Check: Are you sure you have completed 3 months since your last blood donation?")) {
+                    toggleAvailApi(true, {{ latest_completed_id }});
+                } else {
+                    toggle.checked = false;
+                }
+            } else {
+                toggleAvailApi(true, null);
+            }
+        } else {
+            toggleAvailApi(false, null);
+        }
+    }
+
+    function toggleAvailApi(desiredState, clearedId) {
+        let url = "{% url 'toggle_availability' %}?state=" + desiredState;
+        if (clearedId) {
+            url += "&clear_id=" + clearedId;
+        }
+        
+        fetch(url)
         .then(response => response.json())
         .then(data => {
             if(data.status === 'success') {
                 const msg = data.available ? "You are now available for donation!" : "Availability turned off.";
-                alert(msg);
+                if(clearedId) {
+                    location.reload(); // Reload to remove warning banner
+                }
             }
         });
     }

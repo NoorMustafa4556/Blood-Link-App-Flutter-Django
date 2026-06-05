@@ -92,19 +92,23 @@
     .detail-value { font-weight: 700; color: #333; }
 </style>
 <script>
-    function filterTab(status) {
+    function filterTab(tabName) {
         const btns = document.querySelectorAll('.tab-btn');
         btns.forEach(b => b.classList.remove('active'));
-        // Use currentTarget to ensure we get the button even if clicking icon
         event.currentTarget.classList.add('active');
 
         const cards = document.querySelectorAll('.history-card');
         cards.forEach(c => {
-            if (status === 'all' || c.getAttribute('data-status') === status) {
-                c.style.display = 'flex';
-            } else {
-                c.style.display = 'none';
-            }
+            const status = c.getAttribute('data-status');
+            let show = false;
+            
+            if (tabName === 'all') show = true;
+            else if (tabName === 'Pending' && ['Pending', 'Accepted'].includes(status)) show = true;
+            else if (tabName === 'Completed' && ['Completed', 'Fulfilled'].includes(status)) show = true;
+            else if (tabName === 'Rejected' && ['Rejected', 'Cancelled'].includes(status)) show = true;
+            else if (tabName === 'Reported' && status === 'Reported') show = true;
+
+            c.style.display = show ? 'flex' : 'none';
         });
     }
 </script>
@@ -118,8 +122,9 @@
 <div class="tab-nav">
     <button class="tab-btn active" onclick="filterTab('all')">All</button>
     <button class="tab-btn" onclick="filterTab('Pending')">Pending</button>
-    <button class="tab-btn" onclick="filterTab('Accepted')">Accepted</button>
+    <button class="tab-btn" onclick="filterTab('Completed')">Completed</button>
     <button class="tab-btn" onclick="filterTab('Rejected')">Rejected</button>
+    <button class="tab-btn" onclick="filterTab('Reported')">Reported</button>
 </div>
 
 <div id="request-list">

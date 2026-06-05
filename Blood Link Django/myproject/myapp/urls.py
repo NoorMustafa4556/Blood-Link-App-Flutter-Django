@@ -5,6 +5,7 @@ urlpatterns = [
     # 🚀 LANDING & DASHBOARD
     path('', views.landing_view, name='landing'),
     path('home/', views.home_view, name='home'),
+    path('switch-role/', views.switch_role_view, name='switch_role'),
     
     # 🩸 BLOOD REQUESTS & SEARCH
     path('search/', views.search_donors_view, name='search_donors'),
