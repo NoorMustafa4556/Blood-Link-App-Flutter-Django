@@ -309,4 +309,31 @@ A passionate **Flutter Developer** and **Django Developer** from **Bahawalpur, P
 
 ---
 
+## 🔄 App Workflow & Architecture
+
+### 1. Onboarding & Role Selection
+- **Single Account, Dual Roles:** Users register once and can dynamically switch between `Donor` and `Recipient` modes without maintaining separate accounts.
+- **Availability Toggle:** Turning ON the availability toggle makes a user visible in search results as an active Donor.
+
+### 2. Searching & Requesting (Recipient Side)
+- **Smart Filtering:** Recipients filter donors by `Blood Group` and `City`.
+- **Request Form:** A detailed form (Patient Name, Hospital, Time Limit) is sent to the selected Donor.
+- **Real-Time Feed:** The request instantly appears in the Recipient’s "Active Requests" feed and the Donor's "Pending Requests" feed.
+
+### 3. Action & Coordination (Donor Side)
+- **Countdown Timer:** The request must be accepted within the Time Limit, otherwise it automatically transitions to a `Cancelled` state to avoid wasting critical time.
+- **Acceptance:** When accepted, the Donor can write an optional note. Their contact number becomes visible to the Recipient to coordinate the donation.
+
+### 4. Transparency Verification (The Climax)
+- **Recipient Verification:** To prevent fake donors, the system requires the Recipient to click **"Donated A Blood"** once the donor actually arrives and donates.
+- **Reporting System:** If the donor ghosts or does not arrive, the Recipient can mark the request as **"Reported"**.
+- **State Change:** The request securely moves to the respective "Completed" or "Reported" history tab.
+
+### 5. Health Standard Enforcement (Post-Donation Loop)
+- **Dynamic Warning System:** Once a donation is verified as `Completed`, the system instantly pushes a Red Health Warning to the Donor's dashboard advising a 3-month rest.
+- **Availability Lock:** If the Donor attempts to re-enable their availability early, a smart popup verifies: *"Are you sure you have completed 3 months since your last donation?"*
+- **State Persistence:** The clearance is securely tracked via session/SharedPreferences, ensuring health medical standards are maintained securely without frustrating genuine donors.
+
+---
+
 > *"Learning never stops. Every app I build makes me a better developer — one widget at a time."*
