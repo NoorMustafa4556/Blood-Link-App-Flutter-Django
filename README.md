@@ -167,7 +167,7 @@ ipconfg
 ```bash
 flutter pub get
 ```
-7) Run On Your Physical Or Emulator 
+7) Run On Your Physical Device Or Virtual Emulator 
 ```bash
 flutter run
 ```
