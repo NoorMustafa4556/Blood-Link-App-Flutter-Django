@@ -114,30 +114,60 @@ Expired requests → Auto-marked "Cancelled"
 | **Signals** | Django post_save/delete | Auto-sync Constants.dart |
 
 ---
-
+## 🚀 Setup & Installation
 ## 🚀 Quick Start
 
 ### Backend (Django)
+1) Navigate To Project Folder
 ```bash
 cd "Blood Link Django/myproject"
+```
+2) Install Requirements 
+```bash
 pip install -r ../requirements.txt
+```
+3) Make Migrations
+```bash
 python manage.py migrate        # auto-seeds cities & blood groups
+```
+4) Create Super User
+```bash
 python manage.py createsuperuser
+```
+5) Runserver
+```bash
 python manage.py runserver 0.0.0.0:8000
+
 ```
 - Web Portal → `http://localhost:8000`
 - Admin Panel → `http://localhost:8000/admin-panel/`
 
 ### Mobile App (Flutter)
+1) Navigate to Project Directory
 ```bash
 cd bloodlink_flutter
+```
+2) Check Your Laptop Ip By Entering The Command In Your Global Terminal CMD
+```bash
+ipconfg
+```
+3) Copy IPV4 Address
+```bash
+192.168.x.x
+```
+4) Paste IPV4 Address In Config.dart
+```bash
 # Set your laptop IP in lib/utils/Config.dart:
+```
+```bash
 # static const String baseUrl = 'http://192.168.x.x:8000';
+```
+```bash
 flutter pub get
+```
+```bash
 flutter run
 ```
-
-
 
 ## 📸 App Screenshots – Mobile Application
 
@@ -246,51 +276,8 @@ A passionate **Flutter Developer** and **Django Developer** from **Bahawalpur, P
   <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white"/>
   <img src="https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=postman&logoColor=white"/>
 </p>
-## 🚀 Setup & Installation
 
-### 1. Navigate to project
-```bash
-cd "Blood Link Django/myproject"
-```
 
-### 2. Install dependencies
-```bash
-pip install -r ../requirements.txt
-```
-
-### 3. Run migrations (auto-seeds cities & blood groups)
-```bash
-python manage.py migrate
-```
-
-### 4. Create admin account
-```bash
-python manage.py createsuperuser
-```
-
-### 5. Start server (expose to local network)
-```bash
-python manage.py runserver 0.0.0.0:8000
-```
-
-- Web Portal: `http://localhost:8000`
-- Admin Panel: `http://localhost:8000/admin-panel/`
-- Django Default Admin: `http://localhost:8000/admin/`
-
----
-### 3. Install Packages & Run
-
-```bash
-flutter pub get
-flutter run
-```
-
-To build a release APK:
-```bash
-flutter build apk --release
-```
-
----
 
 **📫 Let's Connect:**
 
