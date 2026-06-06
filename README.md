@@ -159,12 +159,15 @@ ipconfg
 ```bash
 # Set your laptop IP in lib/utils/Config.dart:
 ```
+5) Replace In Following Line
 ```bash
 # static const String baseUrl = 'http://192.168.x.x:8000';
 ```
+6) Get Dependencies 
 ```bash
 flutter pub get
 ```
+7) Run On Your Physical Or Emulator 
 ```bash
 flutter run
 ```
